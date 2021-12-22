@@ -6,26 +6,19 @@ using UnityEngine;
 
 public class Movement : MonoBehaviour {
 
+    public enum PathType {
+        Linear
+    }
+
     public bool save;
     public bool load;
     public string movementName;
 
-    public bool reset;
     public Vector3 origin;
-    public float duration;
-    public float ticks = 0f;
 
-    public float horizontalSpeed;
-    public float sinHorizontalSpeed;
-    public float horizontalPeriod;
-    [Range(0f, 1f)] public float horizontalPeriodOffset;
-    public float horizontalAcceleration;
-
-    public float verticalSpeed;
-    public float sinVerticalSpeed;
-    public float verticalPeriod;
-    [Range(0f, 1f)] public float verticalPeriodOffset;
-    public float verticalAcceleration;
+    public List<Vector3> points;
+    public List<PathType> paths;
+    public List<Vector3> nodes;
 
     [System.Serializable]
     public class MovementData {
@@ -107,6 +100,7 @@ public class Movement : MonoBehaviour {
 
     private void Start() {
         origin = transform.position;
+        points.Add(transform.position);
     }
 
     private void Update() {
@@ -120,37 +114,42 @@ public class Movement : MonoBehaviour {
             load = false;
         }
         
-        if (reset) {
-            transform.position = origin;
-            ticks = 0f;
-            reset = false;
+        points = new List<Vector3>();
+        for (int i = 1; i < nodes.Count; i++) {
+            if (paths[i-1] == PathType.Linear) {
+                print("Hello");
+                AddLinearPath(nodes[i - 1], nodes[i]);
+            }
+
         }
 
-        Move();
+        for (int i = 1; i < points.Count; i++) {
+            Debug.DrawLine(points[i-1], points[i], Color.yellow, Time.deltaTime, false);
+        }
     }
 
-    // Movement mechanics
-    private void Move() {
-        ticks += Time.deltaTime;
-        if (ticks > duration) {
-            reset = true;
+    private void AddLinearPath(Vector3 start, Vector3 end) {
+
+        int count = (int)Mathf.Floor((end - start).magnitude * GameRules.UnitPrecision);
+        print(count);
+        Vector3 increment = (end - start) / count;
+
+        for (int i = 0; i < count; i++) {
+            points.Add(start + i * increment);
         }
 
-        Vector3 acceleration = new Vector3(horizontalAcceleration * ticks, verticalAcceleration * ticks, 0f);
-        
-        float horizontal = horizontalSpeed;
-        if (horizontalPeriod != 0) {
-            horizontal += sinHorizontalSpeed * Mathf.Sin(2 * Mathf.PI * (ticks / horizontalPeriod  + horizontalPeriodOffset) );
+    }
+
+    private void AddSinusoidalPath(Vector3 start, Vector3 end) {
+
+        int count = (int)Mathf.Floor((end - start).magnitude * GameRules.UnitPrecision);
+        print(count);
+        Vector3 increment = (end - start) / count;
+
+        for (int i = 0; i < count; i++) {
+            points.Add(start + i * increment);
         }
 
-        float vertical = verticalSpeed;
-        if (verticalPeriod != 0) {
-            vertical += sinVerticalSpeed * Mathf.Sin(2 * Mathf.PI * (ticks / verticalPeriod + verticalPeriodOffset) );
-        }
-            
-
-        Vector3 velocity = new Vector3(horizontal, vertical, 0f) + acceleration;
-        transform.position += velocity * Time.deltaTime;
     }
 
 }
