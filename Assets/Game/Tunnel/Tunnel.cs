@@ -13,30 +13,38 @@ public class Tunnel : MonoBehaviour {
 
         public float width;
         public float length;
-        // [Range(-90f, 90f)] public float angle;
         public float offset;
+        [Range(-90f, 90f)] public float angle;
 
         [HideInInspector] public Vector3 leftPointA;
         [HideInInspector] public Vector3 rightPointA;
         [HideInInspector] public Vector3 leftPointB;
         [HideInInspector] public Vector3 rightPointB;
 
-        public void Randomize(RandomParams rWidth, RandomParams rLength, RandomParams rOffset) {
+        public void Randomize(RandomParams rWidth, RandomParams rLength, RandomParams rOffset, RandomParams rAngle) {
             width = rWidth.Get();
             length = rLength.Get();
             offset = rOffset.Get();
+            angle = rAngle.Get();
         }
 
-        public void Draw(Vector3 leftNode, Vector3 rightNode) {
+        public void Draw(Vector3 leftNode, Vector3 rightNode, bool continous) {
 
             // Nodes are from the previous segment
             // Points are from this segment
 
             Vector3 midPointA = offset * Vector3.right + (leftNode + rightNode) / 2f;
-            leftPointA = midPointA + Vector3.left * width / 2f;
-            rightPointA = midPointA + Vector3.right * width / 2f;
 
-            Vector3 midPointB = midPointA + length * Vector3.up;
+            if (continous) {
+                leftPointA = leftNode;
+                rightPointA = rightNode;
+            }
+            else {
+                leftPointA = midPointA + Vector3.left * width / 2f;
+                rightPointA = midPointA + Vector3.right * width / 2f;
+            }
+
+            Vector3 midPointB = midPointA + length * (Quaternion.Euler(0f, 0f, angle) * Vector3.up);
             leftPointB = midPointB + Vector3.left * width / 2f;
             rightPointB = midPointB + Vector3.right * width / 2f;
 
@@ -55,8 +63,10 @@ public class Tunnel : MonoBehaviour {
     public float entranceWidth;
 
     public bool randomize;
+    public bool continous;
     public RandomParams randomWidth;
     public RandomParams randomLength;
+    public RandomParams randomOffset;
     public RandomParams randomAngle;
 
     public int segmentCount;
@@ -89,17 +99,17 @@ public class Tunnel : MonoBehaviour {
 
         if (randomize) {
             for (int i = 0; i < segments.Length; i++) {
-                segments[i].Randomize(randomWidth, randomLength, randomAngle);
+                segments[i].Randomize(randomWidth, randomLength, randomOffset, randomAngle);
             }
             randomize = false;
         }
 
         if (segments.Length > 0) {
-            segments[0].Draw(transform.localPosition + Vector3.left * entranceWidth / 2f, transform.localPosition + Vector3.right * entranceWidth / 2f);
+            segments[0].Draw(transform.localPosition + Vector3.left * entranceWidth / 2f, transform.localPosition + Vector3.right * entranceWidth / 2f, continous);
         }
 
         for (int i = 1; i < segments.Length; i++) {
-            segments[i].Draw(segments[i-1].leftPointB, segments[i - 1].rightPointB);
+            segments[i].Draw(segments[i - 1].leftPointB, segments[i - 1].rightPointB, continous);
         }
 
         if (render) {
@@ -111,7 +121,7 @@ public class Tunnel : MonoBehaviour {
 
     void Render() {
 
-        List<Vector3> points = new List<Vector3>();       
+        List<Vector3> points = new List<Vector3>();
         List<Color> colors = new List<Color>();
         List<int> indices = new List<int>();
 
