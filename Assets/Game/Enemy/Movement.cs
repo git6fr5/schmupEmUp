@@ -6,25 +6,32 @@ using UnityEngine;
 
 public class Movement : MonoBehaviour {
 
+    [Space(5), Header("Movement")]
+    public string movementName;
     public bool save;
     public bool load;
-    public string movementName;
-
     public bool reset;
     public Vector3 origin;
-    public float duration;
+    [Range(0.05f, 20f)] public float duration;
     public float ticks = 0f;
+    public bool reverse;
+    public bool flip;
 
+    [Space(5), Header("Linear")]
     public float horizontalSpeed;
-    public float sinHorizontalSpeed;
-    public float horizontalPeriod;
-    [Range(0f, 1f)] public float horizontalPeriodOffset;
-    public float horizontalAcceleration;
-
     public float verticalSpeed;
-    public float sinVerticalSpeed;
+
+    [Space(5), Header("Sinusoidal")]
+    public bool circle;
+    public float horizontalAmplitude;
+    public float verticalAmplitude;
+    public float horizontalPeriod;
     public float verticalPeriod;
+    [Range(0f, 1f)] public float horizontalPeriodOffset;
     [Range(0f, 1f)] public float verticalPeriodOffset;
+
+    [Space(5), Header("Acceleration")]
+    public float horizontalAcceleration;
     public float verticalAcceleration;
 
     [System.Serializable]
@@ -33,11 +40,48 @@ public class Movement : MonoBehaviour {
         public static string path = "Movements/";
         public static string filetype = ".movement";
 
-        public MovementData(Movement movement) {
+        public string movementName;
+        public float duration;
+        public float horizontalSpeed;
+        public float verticalSpeed;
+        public float horizontalAmplitude;
+        public float verticalAmplitude;
+        public float horizontalPeriod;
+        public float verticalPeriod;
+        public float horizontalPeriodOffset;
+        public float verticalPeriodOffset;
+        public float horizontalAcceleration;
+        public float verticalAcceleration;
 
+        public MovementData(Movement movement) {
+            this.movementName = movement.movementName;
+            this.duration = movement.duration;
+            this.horizontalSpeed = movement.horizontalSpeed;
+            this.verticalSpeed = movement.verticalSpeed;
+            this.horizontalAmplitude = movement.horizontalAmplitude;
+            this.verticalAmplitude = movement.verticalAmplitude;
+            this.horizontalPeriod = movement.horizontalPeriod;
+            this.verticalPeriod = movement.verticalPeriod;
+            this.horizontalPeriodOffset = movement.horizontalPeriodOffset;
+            this.verticalPeriodOffset = movement.verticalPeriodOffset;
+            this.horizontalAcceleration = movement.horizontalAcceleration;
+            this.verticalAcceleration = movement.horizontalAcceleration;
         }
 
         public static Movement Read(Movement movement, MovementData data) {
+            movement.movementName = data.movementName;
+            movement.duration = data.duration;
+            movement.horizontalSpeed = data.horizontalSpeed;
+            movement.verticalSpeed = data.verticalSpeed;
+            movement.horizontalAmplitude = data.horizontalAmplitude;
+            movement.verticalAmplitude = data.verticalAmplitude;
+            movement.horizontalPeriod = data.horizontalPeriod;
+            movement.verticalPeriod = data.verticalPeriod;
+            movement.horizontalPeriodOffset = data.horizontalPeriodOffset;
+            movement.verticalPeriodOffset = data.verticalPeriodOffset;
+            movement.horizontalAcceleration = data.horizontalAcceleration;
+            movement.verticalAcceleration = data.horizontalAcceleration;
+            movement.ticks = 0f;
             return movement;
         }
 
@@ -119,14 +163,33 @@ public class Movement : MonoBehaviour {
             MovementData.Load(this);
             load = false;
         }
-        
+
         if (reset) {
             transform.position = origin;
             ticks = 0f;
             reset = false;
         }
 
+        if (circle) {
+            float amp = 5;
+            if (horizontalAmplitude != 0 || verticalAmplitude != 0) {
+                amp = Mathf.Abs(horizontalAmplitude) > Mathf.Abs(verticalAmplitude) ? horizontalAmplitude : verticalAmplitude;
+            }
+
+            float period = 1;
+            if (horizontalPeriod != 0 || verticalPeriod != 0) {
+                period = Mathf.Abs(horizontalPeriod) > Mathf.Abs(verticalPeriod) ? horizontalPeriod : verticalPeriod;
+            }
+            horizontalAmplitude = amp; verticalAmplitude = amp;
+            horizontalPeriod = period; verticalPeriod = period;
+            duration = period;
+            horizontalPeriodOffset = 0f;
+            verticalPeriodOffset = 0.25f;
+            circle = false;
+        }
+
         Move();
+        Predict();
     }
 
     // Movement mechanics
@@ -136,21 +199,64 @@ public class Movement : MonoBehaviour {
             reset = true;
         }
 
-        Vector3 acceleration = new Vector3(horizontalAcceleration * ticks, verticalAcceleration * ticks, 0f);
-        
-        float horizontal = horizontalSpeed;
+        float time = reverse ? -ticks : ticks;
+
+        Vector3 acceleration = new Vector3(horizontalAcceleration * time, verticalAcceleration * time, 0f);
+
+        float horizontal = reverse ? -horizontalSpeed : horizontalSpeed;
         if (horizontalPeriod != 0) {
-            horizontal += sinHorizontalSpeed * Mathf.Sin(2 * Mathf.PI * (ticks / horizontalPeriod  + horizontalPeriodOffset) );
+            horizontal += horizontalAmplitude * Mathf.Sin(2 * Mathf.PI * (time / horizontalPeriod + horizontalPeriodOffset));
+        }
+        if (flip) { horizontal *= -1; }
+
+            float vertical = reverse ? -verticalSpeed : verticalSpeed;
+        if (verticalPeriod != 0) {
+            vertical += verticalAmplitude * Mathf.Sin(2 * Mathf.PI * (time / verticalPeriod + verticalPeriodOffset));
         }
 
-        float vertical = verticalSpeed;
-        if (verticalPeriod != 0) {
-            vertical += sinVerticalSpeed * Mathf.Sin(2 * Mathf.PI * (ticks / verticalPeriod + verticalPeriodOffset) );
-        }
-            
 
         Vector3 velocity = new Vector3(horizontal, vertical, 0f) + acceleration;
         transform.position += velocity * Time.deltaTime;
+    }
+
+    private void Predict() {
+
+        int count = (int)Mathf.Floor(duration / Time.deltaTime);
+        List<Vector3> points = new List<Vector3>();
+        points.Add(origin);
+
+        for (int i = 1; i < count; i++) {
+
+            float time = i * Time.deltaTime;
+            Vector3 newPoint = PredictStep(points[i - 1], time, Time.deltaTime);
+            points.Add(newPoint);
+        }
+
+        for (int i = 1; i < points.Count; i++) {
+            Debug.DrawLine(points[i - 1], points[i], Color.yellow, Time.deltaTime, false);
+        }
+
+    }
+
+    private Vector3 PredictStep(Vector3 start, float time, float deltaTime) {
+
+        time = reverse ? -time : time;
+
+        Vector3 acceleration = new Vector3(horizontalAcceleration * time, verticalAcceleration * time, 0f);
+
+        float horizontal = reverse ? -horizontalSpeed : horizontalSpeed;
+        if (horizontalPeriod != 0) {
+            horizontal += horizontalAmplitude * Mathf.Sin(2 * Mathf.PI * (time / horizontalPeriod + horizontalPeriodOffset));
+        }
+        if (flip) { horizontal *= -1; }
+
+        float vertical = reverse ? -verticalSpeed : verticalSpeed;
+        if (verticalPeriod != 0) {
+            vertical += verticalAmplitude * Mathf.Sin(2 * Mathf.PI * (time / verticalPeriod + verticalPeriodOffset));
+        }
+
+        Vector3 velocity = new Vector3(horizontal, vertical, 0f) + acceleration;
+        return start + velocity * deltaTime;
     }
 
 }

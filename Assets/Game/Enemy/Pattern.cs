@@ -4,6 +4,8 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using UnityEngine;
 
+using BulletType = GameRules.Type;
+
 public class Pattern : MonoBehaviour {
 
     // public Nodes node[];
@@ -15,12 +17,12 @@ public class Pattern : MonoBehaviour {
     [Range(0f, 1f)] public float debugLineDuration;
     public bool debugLines;
     public bool debugBullets;
-    public bool save;
-    public bool load;
 
     [Space(5), Header("Pattern")]
     public string patternName;
     public float patternInterval; // Time in between the pattern
+    public bool save;
+    public bool load;
 
     [Space(5), Header("Shots")]
     public float shotCount;
@@ -199,8 +201,10 @@ public class Pattern : MonoBehaviour {
                     Debug.DrawLine(transform.position, transform.position + bulletVelocity, Color.yellow, debugLineDuration, false);
                 }
                 if (debugBullets) {
+                    Enemy enemy = GetComponent<Enemy>();
+                    BulletType type = enemy != null ? enemy.type : BulletType.RedEnemy;
                     Bullet newBullet = Instantiate(bulletBase.gameObject).GetComponent<Bullet>();
-                    newBullet.Init(transform.position, Bullet.Type.Red, bulletVelocity, bulletAcceleration);
+                    newBullet.Init(transform.position, type, bulletVelocity, bulletAcceleration);
                 }
                 if (bulletInterval > 0f) {
                     yield return new WaitForSeconds(bulletInterval);
