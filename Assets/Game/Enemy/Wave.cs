@@ -278,7 +278,11 @@ public class Wave : MonoBehaviour {
 
                 float midPoint = (((float)spawnsPerWave - 1f) / 2f);
                 float _j = (float)j;
-                float offset = (_j - midPoint) / ((float)spawnsPerWave - 1f);
+                float invDenom = 0f;
+                if (spawnsPerWave > 1f) {
+                    invDenom = 1 / ((float)spawnsPerWave - 1f);
+                }
+                float offset = (_j - midPoint) * invDenom;
                 Vector3 n = (Quaternion.Euler(0f, 0f, 90f) * (targetPoint - origin)).normalized * spawnSpread / 2f;
 
                 // Start the initialization process

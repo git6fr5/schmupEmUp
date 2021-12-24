@@ -25,6 +25,8 @@ public class Pattern : MonoBehaviour {
     public bool load;
 
     [Space(5), Header("Shots")]
+    public bool aimOnce;
+    public bool aimContinous;
     public float shotCount;
     public float shotInterval; // Time in between the shots
     public float shotInitAngle; // The initial angle the first shot fires at
@@ -48,6 +50,8 @@ public class Pattern : MonoBehaviour {
 
         public string patternName;
         public float patternInterval;
+        public bool aimOnce;
+        public bool aimContinous;
         public float shotCount;
         public float shotInterval;
         public float shotInitAngle;
@@ -63,6 +67,8 @@ public class Pattern : MonoBehaviour {
         public PatternData(Pattern pattern) {
             this.patternName = pattern.patternName;
             this.patternInterval = pattern.patternInterval;
+            this.aimOnce = pattern.aimOnce;
+            this.aimContinous = pattern.aimContinous;
             this.shotCount = pattern.shotCount;
             this.shotInterval = pattern.shotInterval;
             this.shotInitAngle = pattern.shotInitAngle;
@@ -74,6 +80,26 @@ public class Pattern : MonoBehaviour {
             this.bulletSpeed = pattern.bulletSpeed;
             this.bulletAccelerationAngle = pattern.bulletAccelerationAngle;
             this.bulletAccelerationMagnitude = pattern.bulletAccelerationMagnitude;
+        }
+
+        public static Pattern Read(Pattern pattern, PatternData data) {
+            pattern.patternName = data.patternName;
+            pattern.patternInterval = data.patternInterval;
+            pattern.aimOnce = data.aimOnce;
+            pattern.aimContinous = data.aimContinous;
+            pattern.shotCount = data.shotCount;
+            pattern.shotInterval = data.shotInterval;
+            pattern.shotInitAngle = data.shotInitAngle;
+            pattern.shotSpread = data.shotSpread;
+            pattern.bulletCount = data.bulletCount;
+            pattern.bulletInterval = data.bulletInterval;
+            pattern.bulletInitAngle = data.bulletInitAngle;
+            pattern.bulletSpread = data.bulletSpread;
+            pattern.bulletSpeed = data.bulletSpeed;
+            pattern.bulletAccelerationAngle = data.bulletAccelerationAngle;
+            pattern.bulletAccelerationMagnitude = data.bulletAccelerationMagnitude;
+
+            return pattern;
         }
 
         public static void Save(Pattern pattern) {
@@ -138,24 +164,6 @@ public class Pattern : MonoBehaviour {
 
         }
 
-        public static Pattern Read(Pattern pattern, PatternData data) {
-            pattern.patternName = data.patternName;
-            pattern.patternInterval = data.patternInterval;
-            pattern.shotCount = data.shotCount;
-            pattern.shotInterval = data.shotInterval;
-            pattern.shotInitAngle = data.shotInitAngle;
-            pattern.shotSpread = data.shotSpread;
-            pattern.bulletCount = data.bulletCount;
-            pattern.bulletInterval = data.bulletInterval;
-            pattern.bulletInitAngle = data.bulletInitAngle;
-            pattern.bulletSpread = data.bulletSpread;
-            pattern.bulletSpeed = data.bulletSpeed;
-            pattern.bulletAccelerationAngle = data.bulletAccelerationAngle;
-            pattern.bulletAccelerationMagnitude = data.bulletAccelerationMagnitude;
-
-            return pattern;
-        }
-
     }
 
     private void Start() {
@@ -186,13 +194,28 @@ public class Pattern : MonoBehaviour {
                 shotAngle += shotNumber * (shotSpread / (shotCount-1));
             }
 
+            Vector3 target = Vector3.right;
+            if (aimOnce) {
+                target = AimAtPlayer();
+            }
+
             for (int bulletNumber = 0; bulletNumber < bulletCount; bulletNumber++) {
 
                 float bulletAngle = shotAngle + bulletInitAngle;
                 if (bulletCount > 1) {
                     bulletAngle += bulletNumber * (bulletSpread / (bulletCount-1));
                 }
-                Vector3 bulletVelocity = bulletSpeed * (Quaternion.Euler(0f, 0f, bulletAngle) * Vector3.right);
+
+                Vector3 direction = (Quaternion.Euler(0f, 0f, bulletAngle) * Vector3.right);
+                if (aimOnce) {
+                    float angle = bulletNumber * (bulletSpread / (bulletCount - 1)) - (bulletSpread / 2f);
+                    direction = Quaternion.Euler(0f, 0f, angle) * target;
+                }
+                if (aimContinous) {
+                    direction = AimAtPlayer();
+                }
+                
+                Vector3 bulletVelocity = bulletSpeed * direction;
                 Vector2 bulletAcceleration = bulletAccelerationMagnitude * (Quaternion.Euler(0f, 0f, bulletAccelerationAngle) * bulletVelocity.normalized);
 
                 if (debugLines) {
@@ -220,4 +243,18 @@ public class Pattern : MonoBehaviour {
         StartCoroutine(IEPattern());
     }
 
+    private Vector3 AimAtPlayer() {
+        Vector3 direction;
+        Player player = (Player)GameObject.FindObjectOfType(typeof(Player));
+        if (player != null) {
+            direction = (player.transform.position - transform.position).normalized;
+        }
+        else {
+            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            mousePos -= mousePos.z * Vector3.forward;
+            direction = (mousePos - transform.position).normalized;
+        }
+
+        return direction;
+    }
 }
