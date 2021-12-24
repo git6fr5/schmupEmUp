@@ -153,16 +153,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waveName: waveA
+  editing: 0
+  resetTarget: 0
+  mouseTarget: 0
   save: 0
   load: 1
   flip: 1
   reset: 1
   pause: 0
   enemyBase: {fileID: 542960376}
-  enemyNames: []
+  enemyName: 
   type: 1
-  counts: 
-  delays: []
+  spawnsPerWave: 0
+  spawnSpread: 0
+  waves: 0
+  waveDelay: 0
   isCompleted: 0
   spawns: []
   origin: {x: 0, y: 0, z: 0}
@@ -184,6 +189,50 @@ Transform:
   - {fileID: 542960377}
   m_Father: {fileID: 442306991}
   m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &375923502
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 375923504}
+  - component: {fileID: 375923503}
+  m_Layer: 0
+  m_Name: Sequencer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &375923503
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 375923502}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12778d6de238af64281409ad2e583780, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sequenceComponents: []
+--- !u!4 &375923504
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 375923502}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &442306990
 GameObject:
@@ -215,7 +264,7 @@ Transform:
   - {fileID: 1612094646}
   - {fileID: 38641814}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &498449594
 GameObject:
@@ -303,6 +352,8 @@ MonoBehaviour:
   patternInterval: 0
   save: 0
   load: 0
+  aimOnce: 0
+  aimContinous: 0
   shotCount: 0
   shotInterval: 0
   shotInitAngle: 0
@@ -622,6 +673,8 @@ MonoBehaviour:
   patternInterval: 0
   save: 0
   load: 0
+  aimOnce: 0
+  aimContinous: 0
   shotCount: 0
   shotInterval: 0
   shotInitAngle: 0
@@ -777,16 +830,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waveName: bot1_wA
+  editing: 0
+  resetTarget: 0
+  mouseTarget: 0
   save: 0
   load: 1
   flip: 1
   reset: 1
   pause: 0
   enemyBase: {fileID: 949334479}
-  enemyNames: []
+  enemyName: 
   type: 1
-  counts: 
-  delays: []
+  spawnsPerWave: 0
+  spawnSpread: 0
+  waves: 0
+  waveDelay: 0
   isCompleted: 0
   spawns: []
   origin: {x: 0, y: 0, z: 0}
@@ -1225,6 +1283,8 @@ MonoBehaviour:
   patternInterval: 0
   save: 0
   load: 0
+  aimOnce: 0
+  aimContinous: 0
   shotCount: 0
   shotInterval: 0
   shotInitAngle: 0
@@ -1587,6 +1647,8 @@ MonoBehaviour:
   patternInterval: 0
   save: 0
   load: 0
+  aimOnce: 0
+  aimContinous: 0
   shotCount: 0
   shotInterval: 0
   shotInitAngle: 0
@@ -1676,16 +1738,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waveName: waveA
+  editing: 0
+  resetTarget: 0
+  mouseTarget: 0
   save: 0
   load: 1
   flip: 0
   reset: 1
   pause: 0
   enemyBase: {fileID: 1306451548}
-  enemyNames: []
+  enemyName: 
   type: 0
-  counts: 
-  delays: []
+  spawnsPerWave: 0
+  spawnSpread: 0
+  waves: 0
+  waveDelay: 0
   isCompleted: 0
   spawns: []
   origin: {x: 0, y: 0, z: 0}
@@ -2027,13 +2094,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1942821873}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 26.347633, y: 58.65826, z: -22.201029}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 2125308712}
   - {fileID: 661002005}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2009939958
 GameObject:
@@ -2238,16 +2305,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waveName: bot1_wA
+  editing: 0
+  resetTarget: 0
+  mouseTarget: 0
   save: 0
   load: 1
   flip: 0
   reset: 1
   pause: 0
   enemyBase: {fileID: 498449596}
-  enemyNames: []
+  enemyName: 
   type: 0
-  counts: 
-  delays: []
+  spawnsPerWave: 0
+  spawnSpread: 0
+  waves: 0
+  waveDelay: 0
   isCompleted: 0
   spawns: []
   origin: {x: 0, y: 0, z: 0}

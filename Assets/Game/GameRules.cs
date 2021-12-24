@@ -23,7 +23,7 @@ public class GameRules : MonoBehaviour {
     public static GameObject RestartObject;
 
     // Should probably just grab this from the camera instead of hardcoding it here.
-    public static int ScreenPixelHeight = 360;
+    public static int ScreenPixelHeight = 320;
     public static int ScreenPixelWidth = 640;
     public static int PixelsPerUnit = 16;
 

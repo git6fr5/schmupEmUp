@@ -65,7 +65,7 @@ public class Movement : MonoBehaviour {
             this.horizontalPeriodOffset = movement.horizontalPeriodOffset;
             this.verticalPeriodOffset = movement.verticalPeriodOffset;
             this.horizontalAcceleration = movement.horizontalAcceleration;
-            this.verticalAcceleration = movement.horizontalAcceleration;
+            this.verticalAcceleration = movement.verticalAcceleration;
         }
 
         public static Movement Read(Movement movement, MovementData data) {
@@ -80,7 +80,7 @@ public class Movement : MonoBehaviour {
             movement.horizontalPeriodOffset = data.horizontalPeriodOffset;
             movement.verticalPeriodOffset = data.verticalPeriodOffset;
             movement.horizontalAcceleration = data.horizontalAcceleration;
-            movement.verticalAcceleration = data.horizontalAcceleration;
+            movement.verticalAcceleration = data.verticalAcceleration;
             movement.ticks = 0f;
             return movement;
         }
