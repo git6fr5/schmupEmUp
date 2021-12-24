@@ -9,7 +9,7 @@ using Type = GameRules.Type;
 public class Player : MonoBehaviour {
 
     public static KeyCode InputKey = KeyCode.Space;
-    public static bool MouseAim = true;
+    public static bool MouseAim = false;
 
     SpriteRenderer spriteRenderer;
     CircleCollider2D hitbox;

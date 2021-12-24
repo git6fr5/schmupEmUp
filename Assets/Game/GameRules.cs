@@ -19,6 +19,13 @@ public class GameRules : MonoBehaviour {
     public Material redMaterial;
     public Material blueMaterial;
 
+    public static GameObject PlayerObject;
+    public static GameObject RestartObject;
+
+    // Should probably just grab this from the camera instead of hardcoding it here.
+    public static int ScreenPixelHeight = 360;
+    public static int ScreenPixelWidth = 640;
+    public static int PixelsPerUnit = 16;
 
     public static int ColorPaletteSize = 2;
     public enum Type {
@@ -34,6 +41,10 @@ public class GameRules : MonoBehaviour {
         ScrollSpeed = scrollSpeed;
         RedMaterial = redMaterial;
         BlueMaterial = blueMaterial;
+
+        PlayerObject = ((Player)GameObject.FindObjectOfType(typeof(Player)))?.gameObject;
+        RestartObject = ((RestartUI)GameObject.FindObjectOfType(typeof(RestartUI)))?.gameObject;
+
     }
 
     void Update() {
@@ -44,6 +55,14 @@ public class GameRules : MonoBehaviour {
             scrollSpeed = maxScrollSpeed;
         }
         ScrollSpeed = scrollSpeed;
+
+        // Restarting
+        if (PlayerObject == null && RestartObject != null) {
+            RestartObject.SetActive(true);
+        }
+        else {
+            // RestartObject.SetActive(false);
+        }
     }
 
     [System.Serializable]
@@ -53,6 +72,10 @@ public class GameRules : MonoBehaviour {
 
         public float Get() {
             return Random.Range(min, max);
+        }
+
+        public float GetRound() {
+            return Mathf.Round(Random.Range(min, max));
         }
     }
 

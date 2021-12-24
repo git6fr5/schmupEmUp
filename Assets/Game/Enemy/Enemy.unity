@@ -155,9 +155,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8782002d6d7559649bfa8ed96d821841, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyName: enemyA
+  enemyName: bot1
   save: 0
   load: 1
+  reset: 1
   init: 1
   isInitialized: 0
   type: 1

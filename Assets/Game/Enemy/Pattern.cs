@@ -177,8 +177,6 @@ public class Pattern : MonoBehaviour {
 
     private IEnumerator IEPattern() {
 
-        yield return new WaitForSeconds(patternInterval);
-
         for (int shotNumber = 0; shotNumber < shotCount; shotNumber++) {
             // Fire shot.
 
@@ -216,6 +214,8 @@ public class Pattern : MonoBehaviour {
                 yield return new WaitForSeconds(shotInterval);
             }
         }
+
+        yield return new WaitForSeconds(Mathf.Max(0f, patternInterval - shotCount * (shotInterval + bulletCount * bulletInterval)));
 
         StartCoroutine(IEPattern());
     }

@@ -13,6 +13,12 @@ using SerializableVector3 = GameRules.SerializableVector3;
 public class Wave : MonoBehaviour {
 
     public string waveName;
+    [Space(5), Header("Editing")]
+    public bool editing;
+    public bool resetTarget;
+    public bool mouseTarget;
+
+    [Space(5), Header("IO")]
     public bool save;
     public bool load;
     public bool flip;
@@ -20,10 +26,13 @@ public class Wave : MonoBehaviour {
     public bool pause;
     public Enemy enemyBase;
 
-    public string[] enemyNames;
+    [Space(5), Header("Properties")]
+    public string enemyName;
     public Type type;
-    public int[] counts;
-    public float[] delays;
+    public int spawnsPerWave;
+    public int spawnSpread;
+    public int waves;
+    public float waveDelay;
     public bool isCompleted;
 
     public List<Enemy> spawns = new List<Enemy>();
@@ -42,9 +51,13 @@ public class Wave : MonoBehaviour {
         public static string filetype = ".wave";
 
         public string waveName;
-        public string[] enemyNames;
-        public int[] counts;
-        public float[] delays;
+        public string enemyName;
+
+        public int spawnsPerWave;
+        public int spawnSpread;
+        public int waves;
+        public float waveDelay;
+
         public SerializableVector3 origin;
         public SerializableVector3 targetPoint;
         public float initializeDelay;
@@ -52,9 +65,13 @@ public class Wave : MonoBehaviour {
 
         public WaveData(Wave wave) {
             this.waveName = wave.waveName;
-            this.enemyNames = wave.enemyNames;
-            this.counts = wave.counts;
-            this.delays = wave.delays;
+            this.enemyName = wave.enemyName;
+
+            this.spawnsPerWave = wave.spawnsPerWave;
+            this.spawnSpread = wave.spawnSpread;
+            this.waves = wave.waves;
+            this.waveDelay = wave.waveDelay;
+
             this.origin = new SerializableVector3(wave.origin);
             this.targetPoint = new SerializableVector3(wave.targetPoint);
             this.initializeDelay = wave.initializeDelay;
@@ -63,13 +80,18 @@ public class Wave : MonoBehaviour {
 
         public static Wave Read(Wave wave, WaveData data) {
             wave.waveName = data.waveName;
-            wave.enemyNames = data.enemyNames;
-            wave.counts = data.counts;
-            wave.delays = data.delays;
+            wave.enemyName = data.enemyName;
+
+            wave.spawnsPerWave = data.spawnsPerWave;
+            wave.spawnSpread = data.spawnSpread;
+            wave.waves = data.waves;
+            wave.waveDelay = data.waveDelay;
+
+            wave.origin = data.origin.Deserialize();
             wave.targetPoint = data.targetPoint.Deserialize();
             wave.initializeDelay = data.initializeDelay;
             wave.waveSpeed = data.waveSpeed;
-            wave.origin = data.origin.Deserialize();
+
             wave.transform.position = data.origin.Deserialize();
             return wave;
         }
@@ -146,6 +168,24 @@ public class Wave : MonoBehaviour {
     // Update is called once per frame
     void Update() {
 
+        if (editing) {
+            transform.position = origin;
+            if (resetTarget) {
+                targetPoint = origin;
+                resetTarget = false;
+            }
+            if (mouseTarget) {
+                if (Input.GetMouseButton(0)) {
+                    origin = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                    origin -= origin.z * Vector3.forward;
+                }
+                if (Input.GetMouseButton(1)) {
+                    targetPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                    targetPoint -= targetPoint.z * Vector3.forward;
+                }
+            }
+        }
+
         if (save) {
             WaveData.Save(this);
             save = false;
@@ -168,35 +208,11 @@ public class Wave : MonoBehaviour {
         }
 
         if (reset) {
-
-            int[] tempCounts = new int[enemyNames.Length];
-            for (int i = 0; i < enemyNames.Length; i++) {
-                if (i < counts.Length) {
-                    tempCounts[i] = counts[i];
-                }
-                else {
-                    tempCounts[i] = 1;
-                }
-            }
-            counts = tempCounts;
-
-            float[] tempDelays = new float[enemyNames.Length];
-            for (int i = 0; i < enemyNames.Length; i++) {
-                if (i < delays.Length) {
-                    tempDelays[i] = delays[i];
-                }
-                else {
-                    tempDelays[i] = 0f;
-                }
-            }
-            delays = tempDelays;
-
             for (int i = 0; i < spawns.Count; i++) {
                 if (spawns[i] != null) {
                     Destroy(spawns[i].gameObject);
                 }
             }
-
             spawns = new List<Enemy>();
             if (spawnRoutine != null) {
                 StopCoroutine(spawnRoutine);
@@ -210,7 +226,7 @@ public class Wave : MonoBehaviour {
 
         for (int i = 0; i < spawns.Count; i++) {
             if (spawns[i] != null && !spawns[i].isInitialized) {
-                spawns[i].transform.position += (targetPoint - spawns[i].transform.position).normalized * waveSpeed * Time.deltaTime;
+                spawns[i].transform.position += (targetPoint - transform.position).normalized * waveSpeed * Time.deltaTime;
             }
         }
 
@@ -227,6 +243,8 @@ public class Wave : MonoBehaviour {
 
         Vector3 v = (targetPoint - transform.position).normalized * waveSpeed * initializeDelay;
         Debug.DrawLine(transform.position, transform.position + v, Color.red, Time.deltaTime, false);
+        Vector3 n = (Quaternion.Euler(0f, 0f, 90f) * v).normalized * spawnSpread / 2f;
+        Debug.DrawLine(transform.position - n, transform.position + n, Color.red, Time.deltaTime, false);
 
         Scroll();
     }
@@ -243,30 +261,35 @@ public class Wave : MonoBehaviour {
 
         isCompleted = false;
 
-        for (int i = 0; i < enemyNames.Length; i++) {
-            // Get the data.
-            EnemyData newEnemyData = EnemyData.Load(enemyNames[i]);
-            for (int j = 0; j < counts[i]; j++) {
+        // Get the data.
+        EnemyData newEnemyData = EnemyData.Load(enemyName);
+        for (int i = 0; i < waves; i++) {
 
-                while (pause) {
-                    yield return null;
-                }
+            while (pause) {
+                yield return null;
+            }
 
+            for (int j = 0; j < spawnsPerWave; j++) {
                 // Create the enemy.
                 Enemy newEnemy = Instantiate(enemyBase.gameObject).GetComponent<Enemy>();
                 // Put the data into the enemy
                 EnemyData.Read(newEnemy, newEnemyData);
                 spawns.Add(newEnemy);
 
+                float midPoint = (((float)spawnsPerWave - 1f) / 2f);
+                float _j = (float)j;
+                float offset = (_j - midPoint) / ((float)spawnsPerWave - 1f);
+                Vector3 n = (Quaternion.Euler(0f, 0f, 90f) * (targetPoint - origin)).normalized * spawnSpread / 2f;
+
                 // Start the initialization process
                 newEnemy.gameObject.SetActive(true);
-                newEnemy.transform.position = transform.position;
+                newEnemy.transform.position = transform.position + n * offset;
                 newEnemy.GetComponent<Movement>().duration = initializeDelay + Time.deltaTime;
                 newEnemy.Color(type);
                 StartCoroutine(IEInitializeEnemy(newEnemy, initializeDelay));
-
-                yield return new WaitForSeconds(delays[i]);
             }
+                    
+            yield return new WaitForSeconds(waveDelay);
         }
 
         isCompleted = true;

@@ -21,11 +21,19 @@ public class Tunnel : MonoBehaviour {
         [HideInInspector] public Vector3 leftPointB;
         [HideInInspector] public Vector3 rightPointB;
 
-        public void Randomize(RandomParams rWidth, RandomParams rLength, RandomParams rOffset, RandomParams rAngle) {
-            width = rWidth.Get();
-            length = rLength.Get();
-            offset = rOffset.Get();
-            angle = rAngle.Get();
+        public void Randomize(RandomParams rWidth, RandomParams rLength, RandomParams rOffset, RandomParams rAngle, bool round) {
+            if (!round) {
+                width = rWidth.Get();
+                length = rLength.Get();
+                offset = rOffset.Get();
+                angle = rAngle.Get();
+            }
+            else {
+                width = rWidth.GetRound();
+                length = rLength.GetRound();
+                offset = rOffset.GetRound();
+                angle = rAngle.GetRound();
+            }
         }
 
         public void Draw(Vector3 leftNode, Vector3 rightNode, bool continous) {
@@ -56,6 +64,11 @@ public class Tunnel : MonoBehaviour {
             Debug.DrawLine(leftPointA, rightPointA, Color.yellow, Time.deltaTime, false);
             Debug.DrawLine(leftPointB, rightPointB, Color.yellow, Time.deltaTime, false);
 
+            leftPointA -= new Vector3(0f, 0f, leftPointA.z);
+            leftPointB -= new Vector3(0f, 0f, leftPointB.z);
+            rightPointA -= new Vector3(0f, 0f, rightPointA.z);
+            rightPointB -= new Vector3(0f, 0f, rightPointB.z);
+
         }
 
     }
@@ -64,6 +77,7 @@ public class Tunnel : MonoBehaviour {
 
     public bool randomize;
     public bool continous;
+    public bool round;
     public RandomParams randomWidth;
     public RandomParams randomLength;
     public RandomParams randomOffset;
@@ -73,6 +87,7 @@ public class Tunnel : MonoBehaviour {
     public TunnelSegment[] segments;
 
     public bool render;
+    public bool renderRange;
     public Color backgroundColor;
     private MeshFilter meshFilter;
 
@@ -99,7 +114,7 @@ public class Tunnel : MonoBehaviour {
 
         if (randomize) {
             for (int i = 0; i < segments.Length; i++) {
-                segments[i].Randomize(randomWidth, randomLength, randomOffset, randomAngle);
+                segments[i].Randomize(randomWidth, randomLength, randomOffset, randomAngle, round);
             }
             randomize = false;
         }
@@ -113,38 +128,55 @@ public class Tunnel : MonoBehaviour {
         }
 
         if (render) {
-            Render();
+            Render(0, segments.Length);
             render = false;
         }
+        else if (renderRange) {
+            // Get the ones next to the player.
+            // Assumes no angle
+            // Assumes length is fixed (not random range).
+            int segmentLength = (int)randomLength.GetRound();
+            List<TunnelSegment> segmentsWithinScreen = new List<TunnelSegment>();
+            float screenHeight = (float)(GameRules.ScreenPixelHeight / GameRules.PixelsPerUnit);
+            float cameraHeight = Camera.main.transform.position.y;
+
+            int startIndex = (int)(cameraHeight / segmentLength);
+            print(startIndex);
+
+            Render(startIndex, startIndex + (int)Mathf.Ceil(screenHeight / segmentLength));
+        }
+        
 
     }
 
-    void Render() {
+    void Render(int startIndex, int finalIndex) {
 
         List<Vector3> points = new List<Vector3>();
         List<Color> colors = new List<Color>();
         List<int> indices = new List<int>();
 
-        for (int i = 0; i < segments.Length; i++) {
+        int index = 0;
+        for (int i = startIndex; i < finalIndex; i++) {
 
             points.Add(segments[i].leftPointA - transform.localPosition);
             points.Add(segments[i].rightPointA - transform.localPosition);
             points.Add(segments[i].leftPointB - transform.localPosition);
             points.Add(segments[i].rightPointB - transform.localPosition);
 
-            indices.Add(4 * i + 0); // left 1
-            indices.Add(4 * i + 3); // left 2
-            indices.Add(4 * i + 1); // right 1
+            indices.Add(4 * index + 0); // left 1
+            indices.Add(4 * index + 3); // left 2
+            indices.Add(4 * index + 1); // right 1
 
-            indices.Add(4 * i + 0); // right 1
-            indices.Add(4 * i + 2); // right 2
-            indices.Add(4 * i + 3); // left 2
+            indices.Add(4 * index + 0); // right 1
+            indices.Add(4 * index + 2); // right 2
+            indices.Add(4 * index + 3); // left 2
 
             colors.Add(backgroundColor);
             colors.Add(backgroundColor);
             colors.Add(backgroundColor);
             colors.Add(backgroundColor);
 
+            index += 1;
         }
 
         meshFilter.mesh.SetVertices(points);
