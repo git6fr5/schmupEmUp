@@ -9,6 +9,8 @@ public class GameRules : MonoBehaviour {
     public static float MovementPrecision = 0.001f;
     public static float ScrollSpeed;
 
+    public static Camera MainCamera;
+
     public static Material RedMaterial;
     public static Material BlueMaterial;
 
@@ -26,6 +28,12 @@ public class GameRules : MonoBehaviour {
     public static int ScreenPixelHeight = 320;
     public static int ScreenPixelWidth = 640;
     public static int PixelsPerUnit = 16;
+
+    public float rotationRate = 5f;
+    public float maxRotationRate = 15f;
+    public float rotationAcceleration = 0.2f;
+    public float currRotation;
+    public RandomParams rotationChangeInterval;
 
     public static int ColorPaletteSize = 2;
     public enum Type {
@@ -45,6 +53,10 @@ public class GameRules : MonoBehaviour {
         PlayerObject = ((Player)GameObject.FindObjectOfType(typeof(Player)))?.gameObject;
         RestartObject = ((RestartUI)GameObject.FindObjectOfType(typeof(RestartUI)))?.gameObject;
 
+        MainCamera = Camera.main;
+
+        // StartCoroutine(IEGetRotation());
+
     }
 
     void Update() {
@@ -63,12 +75,31 @@ public class GameRules : MonoBehaviour {
         else {
             // RestartObject.SetActive(false);
         }
+
+        rotationRate += rotationAcceleration * Time.deltaTime;
+        MainCamera.transform.position += ScrollSpeed * Vector3.up * Time.deltaTime;
+        MainCamera.transform.eulerAngles += Vector3.forward * currRotation * Time.deltaTime;
+    }
+
+    private IEnumerator IEGetRotation() {
+
+        while (true) {
+            bool rotate = Random.Range(0f, 1f) > 0.75f;
+            currRotation = rotate ? Random.Range(-rotationRate, rotationRate) : 0f;
+            yield return new WaitForSeconds(rotate ? rotationChangeInterval.min : rotationChangeInterval.max);
+        }
+        
     }
 
     [System.Serializable]
     public class RandomParams {
         public float min;
         public float max;
+
+        public RandomParams(float min, float max) {
+            this.min = min;
+            this.max = max;
+        }
 
         public float Get() {
             return Random.Range(min, max);

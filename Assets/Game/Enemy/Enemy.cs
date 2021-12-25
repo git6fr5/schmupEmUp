@@ -37,6 +37,8 @@ public class Enemy : MonoBehaviour {
     Pattern pattern;
     Movement movement;
 
+    public bool isFlying;
+
     public int currPattern;
     public int currMovement;
 
@@ -56,6 +58,7 @@ public class Enemy : MonoBehaviour {
         public string enemyName;
         public string[] bulletPatternFiles;
         public string[] movementFiles;
+        public bool isFlying;
         public bool cycle;
         public bool continous;
 
@@ -63,6 +66,7 @@ public class Enemy : MonoBehaviour {
             this.enemyName = enemy.enemyName;
             this.bulletPatternFiles = enemy.bulletPatternFiles;
             this.movementFiles = enemy.movementFiles;
+            this.isFlying = enemy.isFlying;
             this.cycle = enemy.cycle;
             this.continous = enemy.continous;
         }
@@ -71,6 +75,7 @@ public class Enemy : MonoBehaviour {
             enemy.enemyName = data.enemyName;
             enemy.bulletPatternFiles = data.bulletPatternFiles;
             enemy.movementFiles = data.movementFiles;
+            enemy.isFlying = data.isFlying;
             enemy.cycle = data.cycle;
             enemy.continous = data.continous;
             enemy.currPattern = 0;
@@ -179,6 +184,8 @@ public class Enemy : MonoBehaviour {
         }
 
         pattern = PatternData.Read(pattern, bulletPatternData[currPattern]);
+        pattern.loop = false;
+        pattern.isFinished = false;
         pattern.bulletBase = bullet;
         pattern.debugBullets = true;
 
@@ -224,6 +231,14 @@ public class Enemy : MonoBehaviour {
             return;
         }
 
+        if (pattern.isFinished) {
+            currPattern = (currPattern + 1) % bulletPatternData.Length;
+            PatternData.Read(pattern, bulletPatternData[currPattern]);
+            pattern.isInitialized = false;
+            pattern.loop = false;
+            pattern.isFinished = false;
+        }
+
         if (movement.ticks >= (movement.duration - 2 * Time.deltaTime)) {
             currMovement = (currMovement + 1) % movementData.Length;
             MovementData.Read(movement, movementData[currMovement]);
@@ -244,8 +259,10 @@ public class Enemy : MonoBehaviour {
 
     // The natural scrolling
     void Scroll() {
-        origin += GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
-        transform.position += GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
+        if (isFlying) {
+            origin += GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
+            transform.position += GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
+        }
     }
 
     // Color
@@ -270,7 +287,6 @@ public class Enemy : MonoBehaviour {
     }
 
     void Collision() {
-        print("hello");
 
         float radius = 0.3f;
         Collider2D[] collisions = Physics2D.OverlapCircleAll(transform.position, radius);

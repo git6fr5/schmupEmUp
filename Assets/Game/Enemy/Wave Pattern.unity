@@ -152,10 +152,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6941fabf7bb19848a188a7e19cbb67a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  waveName: 
+  waveName: wave_a
   editing: 1
-  resetTarget: 0
-  mouseTarget: 1
   save: 0
   load: 1
   flip: 0
@@ -169,6 +167,8 @@ MonoBehaviour:
   waves: 0
   waveDelay: 0
   isCompleted: 0
+  isInitialized: 0
+  isFlipped: 0
   spawns: []
   origin: {x: 0, y: 0, z: 0}
   targetPoint: {x: 0, y: 0, z: 0}
@@ -183,7 +183,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330971309}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -25.6, y: 10.1, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1964691307}
@@ -201,6 +201,7 @@ GameObject:
   - component: {fileID: 1820225514}
   - component: {fileID: 1820225513}
   - component: {fileID: 1820225512}
+  - component: {fileID: 1820225516}
   - component: {fileID: 1820225515}
   m_Layer: 0
   m_Name: Main Camera
@@ -291,6 +292,33 @@ MonoBehaviour:
   scrollAcceleration: 0
   redMaterial: {fileID: 2100000, guid: 1e4ce3e736cfe1849a7263a2fdfaea0e, type: 2}
   blueMaterial: {fileID: 2100000, guid: 94423551ad3ec9b49b1bceaeeae16bd6, type: 2}
+  rotationRate: 5
+  maxRotationRate: 15
+  rotationAcceleration: 0.2
+  currRotation: 0
+  rotationChangeInterval:
+    min: 0
+    max: 0
+--- !u!114 &1820225516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1820225511}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a160d838ff8b4b4693ac20007e008c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_AssetsPPU: 16
+  m_RefResolutionX: 640
+  m_RefResolutionY: 360
+  m_UpscaleRT: 0
+  m_PixelSnapping: 0
+  m_CropFrameX: 1
+  m_CropFrameY: 1
+  m_StretchFill: 0
 --- !u!1 &1910528038
 GameObject:
   m_ObjectHideFlags: 0
@@ -450,6 +478,7 @@ MonoBehaviour:
   bulletPatternData: []
   movementFiles: []
   movementData: []
+  isFlying: 0
   currPattern: 0
   currMovement: 0
   cycle: 0

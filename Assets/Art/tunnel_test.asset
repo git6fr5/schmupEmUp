@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af7181f404f1447c0a7a17b3070b952b, type: 3}
+  m_Name: tunnel_test
+  m_EditorClassIdentifier: 
+  m_Angles:
+  - m_Start: -135
+    m_End: -45
+    m_Order: 3
+    m_Sprites:
+    - {fileID: -1082000911790857127, guid: ab1ef258cccb84e4a979381b1f5e1d67, type: 3}
+    - {fileID: 6157931574578168029, guid: 0b56a341ca4909844a79b960834ec16b, type: 3}
+    - {fileID: -5193333872851948457, guid: 0b56a341ca4909844a79b960834ec16b, type: 3}
+    - {fileID: 6805817662890677309, guid: 0b56a341ca4909844a79b960834ec16b, type: 3}
+    - {fileID: 6513568247877161392, guid: 0b56a341ca4909844a79b960834ec16b, type: 3}
+  - m_Start: 135
+    m_End: 225
+    m_Order: 2
+    m_Sprites:
+    - {fileID: -7025427147436719736, guid: 0b56a341ca4909844a79b960834ec16b, type: 3}
+  - m_Start: 45
+    m_End: 135
+    m_Order: 1
+    m_Sprites:
+    - {fileID: -1082000911790857127, guid: ab1ef258cccb84e4a979381b1f5e1d67, type: 3}
+    - {fileID: 6157931574578168029, guid: 0b56a341ca4909844a79b960834ec16b, type: 3}
+    - {fileID: -5193333872851948457, guid: 0b56a341ca4909844a79b960834ec16b, type: 3}
+    - {fileID: 6805817662890677309, guid: 0b56a341ca4909844a79b960834ec16b, type: 3}
+    - {fileID: 6513568247877161392, guid: 0b56a341ca4909844a79b960834ec16b, type: 3}
+  - m_Start: -45
+    m_End: 45
+    m_Order: 0
+    m_Sprites:
+    - {fileID: -7025427147436719736, guid: 0b56a341ca4909844a79b960834ec16b, type: 3}
+    - {fileID: 6157931574578168029, guid: 0b56a341ca4909844a79b960834ec16b, type: 3}
+    - {fileID: 6157931574578168029, guid: 0b56a341ca4909844a79b960834ec16b, type: 3}
+    - {fileID: 6157931574578168029, guid: 0b56a341ca4909844a79b960834ec16b, type: 3}
+  m_FillTexture: {fileID: 0}
+  m_CornerSprites:
+  - m_CornerType: 0
+    m_Sprites:
+    - {fileID: -4722854942923500261, guid: 0b56a341ca4909844a79b960834ec16b, type: 3}
+  - m_CornerType: 1
+    m_Sprites:
+    - {fileID: 7045072597972563662, guid: 0b56a341ca4909844a79b960834ec16b, type: 3}
+  - m_CornerType: 2
+    m_Sprites:
+    - {fileID: -1143204321262571703, guid: 0b56a341ca4909844a79b960834ec16b, type: 3}
+  - m_CornerType: 3
+    m_Sprites:
+    - {fileID: -7762469238929758295, guid: 0b56a341ca4909844a79b960834ec16b, type: 3}
+  - m_CornerType: 4
+    m_Sprites:
+    - {fileID: -4722854942923500261, guid: 0b56a341ca4909844a79b960834ec16b, type: 3}
+  - m_CornerType: 5
+    m_Sprites:
+    - {fileID: -4722854942923500261, guid: 0b56a341ca4909844a79b960834ec16b, type: 3}
+  - m_CornerType: 6
+    m_Sprites:
+    - {fileID: -4722854942923500261, guid: 0b56a341ca4909844a79b960834ec16b, type: 3}
+  - m_CornerType: 7
+    m_Sprites:
+    - {fileID: -4722854942923500261, guid: 0b56a341ca4909844a79b960834ec16b, type: 3}
+  m_FillOffset: 0
+  m_UseSpriteBorders: 1

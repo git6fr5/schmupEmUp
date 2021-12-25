@@ -15,8 +15,6 @@ public class Wave : MonoBehaviour {
     public string waveName;
     [Space(5), Header("Editing")]
     public bool editing;
-    public bool resetTarget;
-    public bool mouseTarget;
 
     [Space(5), Header("IO")]
     public bool save;
@@ -34,6 +32,9 @@ public class Wave : MonoBehaviour {
     public int waves;
     public float waveDelay;
     public bool isCompleted;
+
+    public bool isInitialized;
+    public bool isFlipped;
 
     public List<Enemy> spawns = new List<Enemy>();
     public Vector3 origin;
@@ -92,7 +93,6 @@ public class Wave : MonoBehaviour {
             wave.initializeDelay = data.initializeDelay;
             wave.waveSpeed = data.waveSpeed;
 
-            wave.transform.position = data.origin.Deserialize();
             return wave;
         }
 
@@ -162,7 +162,9 @@ public class Wave : MonoBehaviour {
 
     // Start is called before the first frame update
     void Start() {
-        origin = transform.position;
+        // origin = transform.position;
+        isInitialized = false;
+        isFlipped = false;
     }
 
     // Update is called once per frame
@@ -170,19 +172,13 @@ public class Wave : MonoBehaviour {
 
         if (editing) {
             transform.position = origin;
-            if (resetTarget) {
-                targetPoint = origin;
-                resetTarget = false;
+            if (Input.GetMouseButton(0)) {
+                origin = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                origin -= origin.z * Vector3.forward;
             }
-            if (mouseTarget) {
-                if (Input.GetMouseButton(0)) {
-                    origin = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                    origin -= origin.z * Vector3.forward;
-                }
-                if (Input.GetMouseButton(1)) {
-                    targetPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                    targetPoint -= targetPoint.z * Vector3.forward;
-                }
+            if (Input.GetMouseButton(1)) {
+                targetPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position;
+                targetPoint -= targetPoint.z * Vector3.forward;
             }
         }
 
@@ -193,14 +189,24 @@ public class Wave : MonoBehaviour {
 
         if (load) {
             WaveData.Load(this);
+            // Because we actually only care about this delta.
+            if (!isInitialized) {
+                transform.position += origin;
+            }
             if (flip) {
-                Vector3 newPosition = new Vector3(-transform.position.x, transform.position.y, transform.position.z);
-                Vector3 deltaTarget = (newPosition - transform.position);// - new Vector3(-2f * targetPoint.x, 0f, 0f);
-                // targetPoint += deltaTarget;
-                transform.position = newPosition;
-                origin = newPosition;
+                targetPoint = new Vector3(-targetPoint.x, targetPoint.y, targetPoint.z);
+                if (!isFlipped) {
+                    Vector3 newPosition = new Vector3(-transform.position.x, transform.position.y, transform.position.z);
+                    transform.position = newPosition;
+                    origin = newPosition;
+                    isFlipped = true;
+                }
+            }
+            else if (!flip) {
+                isFlipped = false;
             }
             load = false;
+            isInitialized = true;
         }
 
         if (isCleared) {
@@ -226,7 +232,7 @@ public class Wave : MonoBehaviour {
 
         for (int i = 0; i < spawns.Count; i++) {
             if (spawns[i] != null && !spawns[i].isInitialized) {
-                spawns[i].transform.position += (targetPoint - transform.position).normalized * waveSpeed * Time.deltaTime;
+                spawns[i].transform.position += targetPoint.normalized * waveSpeed * Time.deltaTime;
             }
         }
 
@@ -241,7 +247,7 @@ public class Wave : MonoBehaviour {
             isCleared = true;
         }
 
-        Vector3 v = (targetPoint - transform.position).normalized * waveSpeed * initializeDelay;
+        Vector3 v = targetPoint.normalized * waveSpeed * initializeDelay;
         Debug.DrawLine(transform.position, transform.position + v, Color.red, Time.deltaTime, false);
         Vector3 n = (Quaternion.Euler(0f, 0f, 90f) * v).normalized * spawnSpread / 2f;
         Debug.DrawLine(transform.position - n, transform.position + n, Color.red, Time.deltaTime, false);
@@ -252,7 +258,6 @@ public class Wave : MonoBehaviour {
     // The natural scrolling
     void Scroll() {
         origin += GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
-        targetPoint += GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
         transform.position += GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
     }
 
@@ -283,7 +288,7 @@ public class Wave : MonoBehaviour {
                     invDenom = 1 / ((float)spawnsPerWave - 1f);
                 }
                 float offset = (_j - midPoint) * invDenom;
-                Vector3 n = (Quaternion.Euler(0f, 0f, 90f) * (targetPoint - origin)).normalized * spawnSpread / 2f;
+                Vector3 n = (Quaternion.Euler(0f, 0f, 90f) * targetPoint.normalized) * spawnSpread / 2f;
 
                 // Start the initialization process
                 newEnemy.gameObject.SetActive(true);

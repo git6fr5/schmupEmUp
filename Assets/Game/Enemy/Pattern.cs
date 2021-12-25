@@ -98,7 +98,7 @@ public class Pattern : MonoBehaviour {
             pattern.bulletSpeed = data.bulletSpeed;
             pattern.bulletAccelerationAngle = data.bulletAccelerationAngle;
             pattern.bulletAccelerationMagnitude = data.bulletAccelerationMagnitude;
-
+            pattern.init = true;
             return pattern;
         }
 
@@ -166,8 +166,10 @@ public class Pattern : MonoBehaviour {
 
     }
 
+    private bool init = false;
+    [HideInInspector] public bool isInitialized = false;
+
     private void Start() {
-        StartCoroutine(IEPattern());
     }
 
     private void Update() {
@@ -178,7 +180,16 @@ public class Pattern : MonoBehaviour {
 
         if (load) {
             PatternData.Load(this);
+            init = true;
             load = false;
+        }
+        
+        if (init) {
+            if (!isInitialized) {
+                StartCoroutine(IEPattern());
+                isInitialized = true;
+            }
+            init = false;
         }
 
     }
@@ -240,8 +251,17 @@ public class Pattern : MonoBehaviour {
 
         yield return new WaitForSeconds(Mathf.Max(0f, patternInterval - shotCount * (shotInterval + bulletCount * bulletInterval)));
 
-        StartCoroutine(IEPattern());
+        if (loop) {
+            StartCoroutine(IEPattern());
+        }
+        else {
+            isFinished = true;
+            yield return null;
+        }
     }
+
+    [HideInInspector] public bool isFinished = false;
+    [HideInInspector] public bool loop = true;
 
     private Vector3 AimAtPlayer() {
         Vector3 direction;

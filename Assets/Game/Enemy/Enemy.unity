@@ -155,7 +155,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8782002d6d7559649bfa8ed96d821841, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyName: bot1
+  enemyName: ship1
   save: 0
   load: 1
   reset: 1
@@ -167,6 +167,7 @@ MonoBehaviour:
   bulletPatternData: []
   movementFiles: []
   movementData: []
+  isFlying: 1
   currPattern: 0
   currMovement: 0
   cycle: 1
@@ -208,6 +209,8 @@ MonoBehaviour:
   patternInterval: 0
   save: 0
   load: 0
+  aimOnce: 0
+  aimContinous: 0
   shotCount: 0
   shotInterval: 0
   shotInitAngle: 0
@@ -270,7 +273,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 94423551ad3ec9b49b1bceaeeae16bd6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -291,7 +294,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -6032088169205149682, guid: 39ead329d973be04aad4adfd8c9e851b, type: 3}
+  m_Sprite: {fileID: 21300000, guid: d4d335115b6fbcc438bb33aa999e398c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -518,3 +521,10 @@ MonoBehaviour:
   scrollAcceleration: 0
   redMaterial: {fileID: 2100000, guid: 1e4ce3e736cfe1849a7263a2fdfaea0e, type: 2}
   blueMaterial: {fileID: 2100000, guid: 94423551ad3ec9b49b1bceaeeae16bd6, type: 2}
+  rotationRate: 5
+  maxRotationRate: 15
+  rotationAcceleration: 0.2
+  currRotation: 0
+  rotationChangeInterval:
+    min: 0
+    max: 0

@@ -10,8 +10,12 @@ public class RestartUI : MonoBehaviour {
             // SceneManager.LoadScene(0);
         }
         if (Input.GetKeyDown(KeyCode.R)) {
-            SceneManager.LoadScene(0);
+            Restart();
         }
+    }
+
+    public static void Restart() {
+        SceneManager.LoadScene(0);
     }
 
 }

@@ -8,13 +8,20 @@ using Type = GameRules.Type;
 [RequireComponent(typeof(CircleCollider2D))]
 public class Player : MonoBehaviour {
 
+    public static Vector3 ViewOffset;
     public static KeyCode InputKey = KeyCode.Space;
     public static bool MouseAim = false;
 
-    SpriteRenderer spriteRenderer;
+    [HideInInspector] public SpriteRenderer spriteRenderer;
     CircleCollider2D hitbox;
 
     public Type type;
+
+    public int maxLives = 5;
+    public int lives = 3;
+    public bool invincible;
+    public float explosionDuration;
+    public float invincibilityDuration;
 
     public float maxSpeed;
     public float acceleration;
@@ -33,6 +40,7 @@ public class Player : MonoBehaviour {
 
         viewCam = Camera.main;
         viewCam.transform.position = new Vector3(transform.position.x + viewOffset.x, transform.position.y + viewOffset.y, viewCam.transform.position.z);
+        invincible = false;
     }
 
     // Update is called once per frame
@@ -57,7 +65,7 @@ public class Player : MonoBehaviour {
 
         // Input
         Vector2 movementVector = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        velocity += acceleration * movementVector;
+        velocity += acceleration * (Vector2)(Quaternion.Euler(0f, 0f, viewCam.transform.eulerAngles.z) * (Vector3)movementVector);
 
         // Clamp
         float y = Mathf.Sign(velocity.y) * Mathf.Min(maxSpeed, Mathf.Abs(velocity.y));
@@ -70,9 +78,14 @@ public class Player : MonoBehaviour {
 
     // The natural scrolling
     void Scroll() {
+
+        ViewOffset = viewOffset;
+
         transform.position += GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
-        viewCam.transform.position += GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
-        viewCam.transform.position = new Vector3(transform.position.x + viewOffset.x, viewCam.transform.position.y, viewCam.transform.position.z);
+        float deltaX = transform.position.x - (viewCam.transform.position.x + viewOffset.x);
+        if (Mathf.Abs(deltaX) > 1f) {
+            viewCam.transform.position += (Mathf.Sign(deltaX) * GameRules.ScrollSpeed * Time.deltaTime * Vector3.right);
+        }
     }
 
     // Color
@@ -100,15 +113,76 @@ public class Player : MonoBehaviour {
                 // There's a smarter way to do this I'm sure.
                 if (bulletType < GameRules.ColorPaletteSize) {
                     if (bulletType == playerType) {
-                        //
+                        Respawn();
                     }
                     else if (bulletType != playerType) {
-                        type = (Type)(bulletType + GameRules.ColorPaletteSize);
+                        ChangeColor(bulletType);
                     }
-                }
+                    Destroy(bullet.gameObject);
 
+                }
             }
         }
             
+    }
+
+    private void ChangeColor(int bulletType) {
+        type = (Type)(bulletType + GameRules.ColorPaletteSize);
+    }
+
+    public void Respawn(bool hitWall = false) {
+        if (!invincible) {
+            invincible = true;
+            lives -= 1;
+            if (lives <= 0) {
+                StartCoroutine(IEReset(explosionDuration * 2f));
+            }
+            else {
+                StartCoroutine(IEInvicibility(explosionDuration, invincibilityDuration, 0.1f, hitWall));
+
+            }
+        }
+    }
+
+    private IEnumerator IEReset(float explosionDelay) {
+
+        invincible = true;
+        Time.timeScale = 0.5f;
+        ShakeUI.StartShake(1f, explosionDelay * Time.timeScale);
+        yield return new WaitForSeconds(explosionDelay * Time.timeScale);
+
+        Time.timeScale = 1f;
+        RestartUI.Restart();
+
+        yield return null;
+
+    }
+
+    private IEnumerator IEInvicibility(float explosionDelay, float invincibilityDelay, float flickerDelay, bool hitWall) {
+
+        invincible = true;
+        Time.timeScale = 0.5f;
+        ShakeUI.StartShake(0.25f, explosionDelay * Time.timeScale);
+
+        for (int i = 0; i < (int)(explosionDelay / flickerDelay); i++) {
+            spriteRenderer.enabled = !spriteRenderer.enabled;
+            yield return new WaitForSeconds(flickerDelay * Time.timeScale);
+        }
+
+        Time.timeScale = 1f;
+        if (hitWall) {
+            transform.position = viewCam.transform.position - (Vector3)viewOffset;
+            transform.position -= transform.position.z * Vector3.forward;
+        }
+
+        for (int i = 0; i < (int)(invincibilityDelay/ flickerDelay); i++) {
+            spriteRenderer.enabled = !spriteRenderer.enabled;
+            yield return new WaitForSeconds(flickerDelay);
+        }
+
+        spriteRenderer.enabled = true;
+        invincible = false;
+
+        yield return null;
     }
 }
