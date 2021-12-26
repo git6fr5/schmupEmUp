@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.U2D;
 
 using Type = GameRules.Type;
 
@@ -59,11 +60,12 @@ public class Player : MonoBehaviour {
         Move();
         Scroll();
         Shade();
+        Highlight();
     }
 
     void FixedUpdate() {
         Collision();
-        // RenderRope();
+        RenderRope();
     }
 
     // Movement mechanic
@@ -96,7 +98,7 @@ public class Player : MonoBehaviour {
         transform.position += GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
         float deltaX = transform.position.x - (viewCam.transform.position.x + viewOffset.x);
         if (Mathf.Abs(deltaX) > 1f) {
-            viewCam.transform.position += (Mathf.Sign(deltaX) * GameRules.ScrollSpeed * Time.deltaTime * Vector3.right);
+            // viewCam.transform.position += (Mathf.Sign(deltaX) * GameRules.ScrollSpeed * Time.deltaTime * Vector3.right);
         }
     }
 
@@ -208,7 +210,7 @@ public class Player : MonoBehaviour {
         prevRopeSegments = new Vector3[segmentCount];
 
         for (int i = 0; i < segmentCount; i++) {
-            ropeSegments[i] = transform.position;
+            ropeSegments[i] = transform.position + Vector3.down * i * SegmentLength;
             prevRopeSegments[i] = ropeSegments[i];
         }
         ropeSegments[segmentCount - 1] += ropeLength * Vector3.down;
@@ -216,7 +218,7 @@ public class Player : MonoBehaviour {
 
     // Renders the rope
     void RenderRope() {
-        Simulation();
+        SimulationB();
         for (int i = 1; i < ropeSegments.Length; i++) {
             Debug.DrawLine(ropeSegments[i-1], ropeSegments[i], Color.red, Time.fixedDeltaTime, false);
         }
@@ -227,7 +229,7 @@ public class Player : MonoBehaviour {
     public float frequency;
     public float waveAmplitude;
 
-    void Simulation() {
+    void SimulationA() {
         ticks += Time.fixedDeltaTime;
         Vector3 scrollForce = new Vector3(0f, -weight * GameRules.ScrollSpeed, 0f);
         for (int i = 0; i < segmentCount; i++) {
@@ -237,6 +239,7 @@ public class Player : MonoBehaviour {
 
             Vector3 velocity = ropeSegments[i] - prevRopeSegments[i];
             prevRopeSegments[i] = ropeSegments[i];
+            ropeSegments[i] += GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
             ropeSegments[i] += velocity;
             ropeSegments[i] += scrollForce * Time.fixedDeltaTime;
             ropeSegments[i] += waveFace * Time.fixedDeltaTime;
@@ -244,6 +247,48 @@ public class Player : MonoBehaviour {
         for (int i = 0; i < ConstraintDepth; i++) {
             Constraints();
         }
+    }
+
+    public SpriteShapeController tailShape;
+
+    void SimulationB() {
+
+        // 0 => 1 but just the x?
+        //Vector2 absVelocity = new Vector2(velocity.x, Mathf.Abs(velocity.y));
+        //float angle = Vector2.SignedAngle(Vector2.up, absVelocity);
+        //transform.eulerAngles = Vector3.forward * angle / 2f;
+        //tailShape.transform.eulerAngles = Vector3.zero;
+
+        ropeSegments[0] = transform.position;
+        for (int i = 1; i < ropeSegments.Length; i++) {
+            // ropeSegments[i] += GameRules.ScrollSpeed / 2f * Vector3.up * Time.deltaTime;
+            ropeSegments[i] += (Vector3)velocity / 20f * Time.deltaTime;
+            if ((ropeSegments[i - 1] - ropeSegments[i]).magnitude > SegmentLength) {
+                ropeSegments[i] += (ropeSegments[i - 1] - ropeSegments[i]).normalized * Time.deltaTime * 5f;
+            }
+        }
+
+        for (int i = 0; i < ConstraintDepth; i++) {
+            Constraints();
+        }
+
+        for (int i = 1; i < ropeSegments.Length; i++) {
+            if ((ropeSegments[i - 1] - ropeSegments[i]).magnitude < SegmentLength * 0.95f) {
+                ropeSegments[i] = ropeSegments[i - 1] + (SegmentLength * 0.95f) * ((ropeSegments[i] - ropeSegments[i-1]).normalized);
+            }
+        }
+
+        tailShape.spline.Clear();
+        for (int i = 0; i < ropeSegments.Length; i++) {
+            // spline.InsertPointAt(i, segments[i].leftPointA - transform.localPosition);
+            tailShape.spline.InsertPointAt(i, ropeSegments[i] - transform.localPosition);
+            tailShape.spline.SetTangentMode(i, ShapeTangentMode.Continuous);
+        }
+
+        // ropeSegments[ropeSegments.Length - 1] =
+        // ropeSegments[i] => 
+        // prevRopeSegments
+
     }
 
     void Constraints() {
@@ -263,6 +308,23 @@ public class Player : MonoBehaviour {
             }
             ropeSegments[i] += errorVector * 0.5f;
         }
+    }
+
+    private float highlightTicks = 0f;
+    private float highlightFrequency = 0.25f;
+    private void Highlight() {
+
+        highlightTicks += Time.deltaTime;
+        if (highlightTicks > 1) {
+            // highlightTicks -= 1;
+        }
+
+        float val = Mathf.Sin(2 * Mathf.PI * highlightTicks * highlightFrequency);
+        val += 1f;
+        val *= (0.5f * 0.5f * 0.5f);
+        val += 0.75f;
+        GetComponent<SpriteRenderer>().material.SetFloat("_Highlight", val);
+
     }
 
 }

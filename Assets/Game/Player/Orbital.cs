@@ -12,7 +12,6 @@ public class Orbital : MonoBehaviour {
     public float orbitRadius = 1f;
 
     void Update() {
-
         Move();
 
     }
@@ -40,7 +39,16 @@ public class Orbital : MonoBehaviour {
         target = player.transform.position - displacement;
 
         Vector3 velocity = (target - transform.position).normalized * speed;
+        // velocity.y *= Mathf.Sign(velocity.y);
+        //Vector3 newPosition = transform.position + velocity * Time.deltaTime;
+        //float angle = Vector2.SignedAngle(Vector2.down, newPosition);
+        //angle = angle < 0f ? angle + 360f : angle;
+        //if (angle < 270f && angle > 90f) {
+        //    transform.position += velocity * Time.deltaTime;
+        //}
+
         transform.position += velocity * Time.deltaTime;
+
 
         transform.position = player.transform.position + (transform.position - player.transform.position).normalized * orbitRadius;
         transform.position += GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;

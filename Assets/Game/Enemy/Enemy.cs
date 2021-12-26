@@ -49,6 +49,15 @@ public class Enemy : MonoBehaviour {
 
     [HideInInspector] public bool flip;
 
+    [Range(0, 8)] public int assetIndex;
+
+    public EnemyAssets.BulletType _bulletIndex;
+    private int bulletIndex;
+    public int bulletSize;
+
+    private Sprite regularSprite;
+    private Sprite highlightSprite;
+
     [System.Serializable]
     public class EnemyData {
 
@@ -62,6 +71,11 @@ public class Enemy : MonoBehaviour {
         public bool cycle;
         public bool continous;
 
+        public int assetIndex;
+
+        public int bulletIndex;
+        public int bulletSize;
+
         public EnemyData(Enemy enemy) {
             this.enemyName = enemy.enemyName;
             this.bulletPatternFiles = enemy.bulletPatternFiles;
@@ -69,6 +83,9 @@ public class Enemy : MonoBehaviour {
             this.isFlying = enemy.isFlying;
             this.cycle = enemy.cycle;
             this.continous = enemy.continous;
+            this.assetIndex = enemy.assetIndex;
+            this.bulletIndex = enemy.bulletIndex;
+            this.bulletSize = enemy.bulletSize;
         }
 
         public static Enemy Read(Enemy enemy, EnemyData data) {
@@ -78,6 +95,9 @@ public class Enemy : MonoBehaviour {
             enemy.isFlying = data.isFlying;
             enemy.cycle = data.cycle;
             enemy.continous = data.continous;
+            enemy.assetIndex = data.assetIndex;
+            enemy.bulletIndex = data.bulletIndex;
+            enemy.bulletSize = data.bulletSize;
             enemy.currPattern = 0;
             enemy.currMovement = 0;
             enemy.init = false;
@@ -155,6 +175,22 @@ public class Enemy : MonoBehaviour {
         // Collider();
     }
 
+    public void Set(Type type) {
+        // spriteRenderer.sprite = GameRules.EnemySprites[spriteInd]
+        this.type = type;
+
+        regularSprite = EnemyAssets.Assets[assetIndex].regularSprite;
+        highlightSprite = EnemyAssets.Assets[assetIndex].highlightSprite;
+        _bulletIndex = (EnemyAssets.BulletType)bulletIndex;
+        bullet = EnemyAssets.Bullets[bulletIndex];
+        bullet.index = bulletSize;
+        Color(); // Shouldn't need to do this in update.
+
+        spriteRenderer.sprite = regularSprite;
+
+        // gameObject.SetActive(true);
+    }
+
     // Run this to initialize the enemy
     public void Init(Type type, Vector3 position) {
 
@@ -186,19 +222,18 @@ public class Enemy : MonoBehaviour {
         pattern = PatternData.Read(pattern, bulletPatternData[currPattern]);
         pattern.loop = false;
         pattern.isFinished = false;
-        pattern.bulletBase = bullet;
         pattern.debugBullets = true;
+        pattern.bulletBase = bullet;
 
         spriteRenderer = GetComponent<SpriteRenderer>();
-        // spriteRenderer.sprite = GameRules.EnemySprites[spriteInd]
-        Color(); // Shouldn't need to do this in update.
-
-        gameObject.SetActive(true);
+        
         isInitialized = true;
     }
 
     // Update is called once per frame
     void Update() {
+
+        bulletIndex = (int)_bulletIndex;
 
         if (save) {
             EnemyData.Save(this);
@@ -211,6 +246,7 @@ public class Enemy : MonoBehaviour {
         }
 
         if (reset) {
+            Set(type);
             transform.position = origin;
             reverse = false;
             currMovement = 0;
@@ -226,6 +262,7 @@ public class Enemy : MonoBehaviour {
 
         Scroll();
         Collision();
+        Highlight();
 
         if (!isInitialized) {
             return;
@@ -255,6 +292,19 @@ public class Enemy : MonoBehaviour {
             movement.origin = transform.position;
         }
 
+    }
+
+    private void Highlight() {
+        if (pattern != null) {
+            if (pattern.isFiring) {
+                spriteRenderer.sprite = highlightSprite;
+                spriteRenderer.material.SetFloat("_Highlight", 1f);
+            }
+            else {
+                spriteRenderer.sprite = regularSprite;
+                spriteRenderer.material.SetFloat("_Highlight", 0f);
+            }
+        }
     }
 
     // The natural scrolling

@@ -170,9 +170,11 @@ public class Pattern : MonoBehaviour {
     [HideInInspector] public bool isInitialized = false;
 
     private void Start() {
+
     }
 
     private void Update() {
+
         if (save) {
             PatternData.Save(this);
             save = false;
@@ -237,6 +239,8 @@ public class Pattern : MonoBehaviour {
                     BulletType type = enemy != null ? enemy.type : BulletType.RedEnemy;
                     Bullet newBullet = Instantiate(bulletBase.gameObject).GetComponent<Bullet>();
                     newBullet.Init(transform.position, type, bulletVelocity, bulletAcceleration);
+
+                    StartCoroutine(IEFireEffect());
                 }
                 if (bulletInterval > 0f) {
                     yield return new WaitForSeconds(bulletInterval);
@@ -258,6 +262,26 @@ public class Pattern : MonoBehaviour {
             isFinished = true;
             yield return null;
         }
+    }
+
+    public bool isFiring;
+    public int fireCounts;
+    private IEnumerator IEFireEffect() {
+
+        if (!isFiring) {
+            isFiring = true;
+            fireCounts = 0;
+        }
+
+        fireCounts += 1;
+
+        yield return new WaitForSeconds(0.075f);
+
+        fireCounts -= 1;
+        if (fireCounts <= 0) {
+            isFiring = false;
+        }
+        yield return null;
     }
 
     [HideInInspector] public bool isFinished = false;

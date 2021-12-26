@@ -135,6 +135,7 @@ GameObject:
   - component: {fileID: 627166798}
   - component: {fileID: 627166797}
   - component: {fileID: 627166800}
+  - component: {fileID: 627166801}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -227,6 +228,30 @@ MonoBehaviour:
   m_CropFrameX: 1
   m_CropFrameY: 1
   m_StretchFill: 0
+--- !u!114 &627166801
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 627166796}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b760e955583516f479f58231b9eac506, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scrollSpeed: 0
+  maxScrollSpeed: 10
+  scrollAcceleration: 0
+  redMaterial: {fileID: 2100000, guid: 1e4ce3e736cfe1849a7263a2fdfaea0e, type: 2}
+  blueMaterial: {fileID: 2100000, guid: 94423551ad3ec9b49b1bceaeeae16bd6, type: 2}
+  rotationRate: 0
+  maxRotationRate: 0
+  rotationAcceleration: 0
+  currRotation: 0
+  rotationChangeInterval:
+    min: 0
+    max: 0
 --- !u!1001 &5633724188178438851
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -307,9 +332,49 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4576858996010440800, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
+      propertyPath: m_DynamicOccludee
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4576858996010440800, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7648923872424181266, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7648923872424181266, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7648923872424181266, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7750327014985813581, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
+      propertyPath: m_FillPixelPerUnit
+      value: 16
+      objectReference: {fileID: 0}
     - target: {fileID: 8612845814537346986, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
       propertyPath: m_Name
       value: Platform
+      objectReference: {fileID: 0}
+    - target: {fileID: 8612845814537346988, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
+      propertyPath: m_SortingOrder
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8612845814537346989, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
+      propertyPath: spawnTanks
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8612845814537346989, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
+      propertyPath: spawnTurrets
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8612845814537346989, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
+      propertyPath: tankCount
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8612845814537346990, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
       propertyPath: m_LocalPosition.x
@@ -353,6 +418,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8612845814537346990, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9213690333816804807, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

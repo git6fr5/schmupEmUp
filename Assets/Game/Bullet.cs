@@ -8,6 +8,9 @@ using Type = GameRules.Type;
 [RequireComponent(typeof(SpriteRenderer))]
 public class Bullet : MonoBehaviour {
 
+    public Sprite[] sprites;
+    public int index;
+
     SpriteRenderer spriteRenderer;
     CircleCollider2D hitbox;
 
@@ -28,6 +31,10 @@ public class Bullet : MonoBehaviour {
         if (lifetime == -1) {
             lifetime = defaultLifeTime;
         }
+
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        spriteRenderer.sprite = sprites[index];
+
         Destroy(gameObject, lifetime);
         gameObject.SetActive(true);
 
@@ -44,6 +51,7 @@ public class Bullet : MonoBehaviour {
         transform.position += (Vector3)velocity * Time.deltaTime;
         Scroll();
         Color();
+        Rotate();
     }
 
     // Color
@@ -55,6 +63,12 @@ public class Bullet : MonoBehaviour {
         else if (type == Type.BlueEnemy || type == Type.BluePlayer) {
             spriteRenderer.material = GameRules.BlueMaterial;
         }
+    }
+
+    void Rotate() {
+        float angle = Vector2.SignedAngle(Vector2.up, velocity);
+        angle = angle < 0f ? angle + 360f : angle;
+        transform.eulerAngles = new Vector3(0f, 0f, angle);
     }
 
     void Collider() {

@@ -82,6 +82,9 @@ public class Platform : MonoBehaviour {
     public bool detail;
     public bool path;
     public bool draw;
+    public bool design;
+
+    private bool doneDetailing = false;
 
     void Update() {
 
@@ -126,6 +129,7 @@ public class Platform : MonoBehaviour {
             }
 
             if (detail) {
+                doneDetailing = false;
                 Detail();
                 detail = false;
             }
@@ -140,9 +144,17 @@ public class Platform : MonoBehaviour {
                 spawnTanks = false;
             }
 
-            if (details != null && details.Count > 0 && spawnTurrets) {
-                SpawnTurrets();
-                spawnTurrets = false;
+            if (details != null && details.Count > 0 && doneDetailing) {
+
+                if (design) {
+                    Design();
+                    design = false;
+                }
+
+                if (spawnTurrets) {
+                    SpawnTurrets();
+                    spawnTurrets = false;
+                }
             }
 
             if (render) {
@@ -160,9 +172,12 @@ public class Platform : MonoBehaviour {
     public bool spawnTanks;
 
     private IEnumerator IESpawn() {
+
+        bool blue = Random.Range(0f, 1f) > 0.5f;
+
         for (int i = 0; i < tankCount; i++) {
             Tank newTank = Instantiate(tank.gameObject, pathPoints[0], Quaternion.identity, null).GetComponent<Tank>();
-            newTank.Init(pathPoints);
+            newTank.Init(pathPoints, blue);
             yield return new WaitForSeconds(tankSpawnInterval);
         }
     }
@@ -175,6 +190,8 @@ public class Platform : MonoBehaviour {
 
         List<int> indices = new List<int>();
 
+        bool blue = Random.Range(0f, 1f) > 0.5f;
+
         for (int i = 0; i < maxTurrets; i++) {
 
             int index = Random.Range(0, details.Count);
@@ -185,9 +202,10 @@ public class Platform : MonoBehaviour {
 
         for (int i = 0; i < indices.Count; i++) {
 
-            Instantiate(turret.gameObject);
-            turret.transform.position = transform.position + details[indices[i]].midPoint;
-            turret.gameObject.SetActive(true);
+            Turret newTurret = Instantiate(turret.gameObject).GetComponent<Turret>();
+            newTurret.transform.position = details[indices[i]].midPoint;
+            newTurret.gameObject.SetActive(true);
+            newTurret.Init(blue);
         }
 
     }
@@ -281,6 +299,7 @@ public class Platform : MonoBehaviour {
     }
 
     SpriteShapeController spriteShapeController;
+    public SpriteShapeController pathShapeController;
     public float[] distances;
     public MeshFilter meshFilter;
     public Color color;
@@ -309,6 +328,13 @@ public class Platform : MonoBehaviour {
             // spline.InsertPointAt(i, segments[i].leftPointA - transform.localPosition);
             spriteShapeController.spline.InsertPointAt(i, cleanPath[i] - transform.localPosition);
             spriteShapeController.spline.SetTangentMode(i, ShapeTangentMode.Continuous);
+        }
+
+        pathShapeController.spline.Clear();
+        for (int i = 0; i < cleanPath.Count; i++) {
+            // spline.InsertPointAt(i, segments[i].leftPointA - transform.localPosition);
+            pathShapeController.spline.InsertPointAt(i, pathPoints[i] - transform.localPosition);
+            pathShapeController.spline.SetTangentMode(i, ShapeTangentMode.Continuous);
         }
 
         if (meshFilter.mesh == null) {
@@ -379,19 +405,19 @@ public class Platform : MonoBehaviour {
         rightMost = -Mathf.Infinity; ;// The right most
         bottomMost = Mathf.Infinity; ;// The bottom most
         topMost = -Mathf.Infinity; ;// The top most
-        for (int i = 0; i < segments.Length; i++) {
+        for (int i = 0; i < orderedPoints.Length; i++) {
 
-            if (segments[i].leftPointA.x < leftMost) {
-                leftMost = segments[i].leftPointA.x;
+            if (orderedPoints[i].x < leftMost) {
+                leftMost = orderedPoints[i].x;
             }
-            if (segments[i].rightPointA.x > rightMost) {
-                rightMost = segments[i].rightPointA.x;
+            if (orderedPoints[i].x > rightMost) {
+                rightMost = orderedPoints[i].x;
             }
-            if (segments[i].leftPointA.y > topMost) {
-                topMost = segments[i].leftPointA.y;
+            if (orderedPoints[i].y > topMost) {
+                topMost = orderedPoints[i].y;
             }
-            if (segments[i].leftPointB.y < bottomMost) {
-                bottomMost = segments[i].leftPointB.y;
+            if (orderedPoints[i].y < bottomMost) {
+                bottomMost = orderedPoints[i].y;
             }
 
         }
@@ -425,16 +451,13 @@ public class Platform : MonoBehaviour {
             details[i].Draw(true, Color.blue);
         }
 
-        details = InteriorGrid(details);
-
-        // Generate the details points
-        for (int i = 0; i < details.Count; i++) {
-            details[i].Draw(true, Color.blue);
-        }
+        StartCoroutine(IEInteriorGrid());
 
     }
 
-    private List<PlatformSegment> InteriorGrid(List<PlatformSegment> details) {
+    private IEnumerator IEInteriorGrid() {
+
+        doneDetailing = false;
         List<PlatformSegment> temp = new List<PlatformSegment>();
         for (int i = 0; i < details.Count; i++) {
 
@@ -507,15 +530,25 @@ public class Platform : MonoBehaviour {
                 detailIsContained = false;
             }
 
-
             if (detailIsContained) {
                 temp.Add(details[i]);
             }
+
+            // yield return new WaitForSeconds(0);
         }
 
         print(details.Count.ToString() + ", " + temp.Count.ToString());
         details = temp;
-        return temp;
+
+        // Generate the details points
+        for (int i = 0; i < details.Count; i++) {
+            details[i].Draw(true, Color.blue);
+        }
+
+        doneDetailing = true;
+
+        yield return null;
+
     }
 
     public bool CheckIntersect(Vector2 A1, Vector2 A2, Vector2 B1, Vector2 B2) {
@@ -574,6 +607,22 @@ public class Platform : MonoBehaviour {
             }
         }
 
+    }
+
+    public SpriteRenderer spriteBase;
+    public Sprite[] designs;
+    public float designDensity;
+    private void Design() {
+        for (int i = 0; i < details.Count; i++) {
+                SpriteRenderer newSprite = Instantiate(spriteBase.gameObject, details[i].midPoint, Quaternion.identity, transform).GetComponent<SpriteRenderer>();
+            if (Random.Range(0f, 1f) < designDensity) {
+                newSprite.sprite = designs[Random.Range(0, designs.Length - 1)];
+            }
+            else {
+                newSprite.sprite = designs[designs.Length - 1];
+            }
+            newSprite.gameObject.SetActive(true);
+        }
     }
 
 }

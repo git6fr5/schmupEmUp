@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6941fabf7bb19848a188a7e19cbb67a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  waveName: wave_a
+  waveName: wave_b
   editing: 1
   save: 0
   load: 1
@@ -190,6 +190,63 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1272135566
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 6432115151632601332, guid: 74bfcb91f8a483c49916b07fbef21068, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6432115151632601332, guid: 74bfcb91f8a483c49916b07fbef21068, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6432115151632601332, guid: 74bfcb91f8a483c49916b07fbef21068, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6432115151632601332, guid: 74bfcb91f8a483c49916b07fbef21068, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6432115151632601332, guid: 74bfcb91f8a483c49916b07fbef21068, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6432115151632601332, guid: 74bfcb91f8a483c49916b07fbef21068, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6432115151632601332, guid: 74bfcb91f8a483c49916b07fbef21068, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6432115151632601332, guid: 74bfcb91f8a483c49916b07fbef21068, type: 3}
+      propertyPath: m_RootOrder
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6432115151632601332, guid: 74bfcb91f8a483c49916b07fbef21068, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6432115151632601332, guid: 74bfcb91f8a483c49916b07fbef21068, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6432115151632601332, guid: 74bfcb91f8a483c49916b07fbef21068, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6432115151632601334, guid: 74bfcb91f8a483c49916b07fbef21068, type: 3}
+      propertyPath: m_Name
+      value: Enemy Assets
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 74bfcb91f8a483c49916b07fbef21068, type: 3}
 --- !u!1 &1820225511
 GameObject:
   m_ObjectHideFlags: 0
@@ -350,6 +407,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 362f7d09c8172ab4493ec3fbf3d3e9a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sprites: []
+  index: 0
   type: 0
   velocity: {x: 0, y: 0}
   acceleration: {x: 0, y: 0}
@@ -485,6 +544,9 @@ MonoBehaviour:
   reverse: 0
   continous: 0
   flip: 0
+  assetIndex: 0
+  bulletIndex: 0
+  bulletSize: 0
 --- !u!4 &1964691307
 Transform:
   m_ObjectHideFlags: 0
@@ -584,6 +646,11 @@ MonoBehaviour:
   bulletSpeed: 0
   bulletAccelerationAngle: 0
   bulletAccelerationMagnitude: 0
+  isInitialized: 0
+  isFiring: 0
+  fireCounts: 0
+  isFinished: 0
+  loop: 1
 --- !u!114 &1964691310
 MonoBehaviour:
   m_ObjectHideFlags: 0

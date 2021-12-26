@@ -291,6 +291,7 @@ public class Wave : MonoBehaviour {
                 Vector3 n = (Quaternion.Euler(0f, 0f, 90f) * targetPoint.normalized) * spawnSpread / 2f;
 
                 // Start the initialization process
+                newEnemy.Set(type);
                 newEnemy.gameObject.SetActive(true);
                 newEnemy.transform.position = transform.position + n * offset;
                 newEnemy.GetComponent<Movement>().duration = initializeDelay + Time.deltaTime;

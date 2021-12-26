@@ -15,6 +15,8 @@ public class Tunnel : MonoBehaviour {
         public float offset;
         [Range(-90f, 90f)] public float angle;
 
+        public bool alreadyCheckedForBeam = false;
+
         [HideInInspector] public Vector3 leftPointA;
         [HideInInspector] public Vector3 rightPointA;
         [HideInInspector] public Vector3 leftPointB;
@@ -88,12 +90,11 @@ public class Tunnel : MonoBehaviour {
     public bool render;
     public bool renderRange;
     public Color backgroundColor;
-    private MeshFilter meshFilter;
+    public MeshFilter meshFilter;
 
 
     private Vector3 initialLeftNode;
     private Vector3 initialRightNode;
-
 
     void Start() {
 
@@ -192,7 +193,9 @@ public class Tunnel : MonoBehaviour {
         if (render) {
             // Render(0, segments.Length);
             // CreateJaggedSpriteShape();
+            Render(0, segments.Length);
             CreateContinousSpriteShape();
+            Beams();
             render = false;
         }
 
@@ -203,7 +206,6 @@ public class Tunnel : MonoBehaviour {
     }
 
     void FixedUpdate() {
-
     }
 
     void Render(int startIndex, int finalIndex) {
@@ -236,9 +238,12 @@ public class Tunnel : MonoBehaviour {
             index += 1;
         }
 
+        print(points.Count);
+
         meshFilter.mesh.SetVertices(points);
         meshFilter.mesh.SetIndices(indices.ToArray(), MeshTopology.Triangles, 0);
         meshFilter.mesh.colors = colors.ToArray();
+        meshFilter.mesh.RecalculateBounds();
 
     }
 
@@ -376,6 +381,48 @@ public class Tunnel : MonoBehaviour {
         for (int i = 0; i < index; i++) {
             spriteShapeController.spline.SetTangentMode(i, ShapeTangentMode.Continuous);
         }
+
+    }
+
+    public Beam beam;
+    public List<int> check = new List<int>();
+
+    private void BeamsB() {
+        print("beams");
+        for (int i = startIndex; i < startIndex + segments.Length; i++) {
+
+            if (!check.Contains(i)) {
+                if ((segments[i - startIndex].leftPointA - segments[i - startIndex].rightPointA).magnitude > 1f) {
+                    if (Random.Range(0f, 1f) < 1f) {
+                        Beam newBeam = Instantiate(beam.gameObject).GetComponent<Beam>();
+                        newBeam.leftNode = segments[i - startIndex].leftPointA;
+                        newBeam.rightNode = segments[i - startIndex].rightPointA;
+                        newBeam.Init(Random.Range(0, 3));
+                        newBeam.gameObject.SetActive(true);
+                    }
+                    check.Add(i);
+                }
+            }
+
+        }
+        
+
+    }
+
+    private void Beams() {
+        print("beams");
+        float deltaY = Camera.main.transform.position.y + GameRules.ScreenPixelHeight / GameRules.PixelsPerUnit * 1.5f;
+        for (int i = 0; i < 3; i++) {
+
+            deltaY += Random.Range(0f, 5f);
+            Beam newBeam = Instantiate(beam.gameObject).GetComponent<Beam>();
+            newBeam.leftNode = new Vector3( -50f, startIndex + deltaY, 0f);
+            newBeam.rightNode = new Vector3(50f, startIndex + deltaY, 0f);
+            newBeam.Init(Random.Range(0, 3));
+            newBeam.gameObject.SetActive(true);
+
+        }
+
 
     }
 

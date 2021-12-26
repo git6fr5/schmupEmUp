@@ -128,4 +128,10 @@ public class GameRules : MonoBehaviour {
         }
     }
 
+    public static bool OnScreen(Vector3 position) {
+
+        Vector2 screenPos = MainCamera.WorldToViewportPoint(position);
+        return (screenPos.x < 1 && screenPos.x > 0 && screenPos.y < 1 && screenPos.y > 0);
+    }
+
 }
