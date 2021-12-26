@@ -14,7 +14,7 @@ public class Bullet : MonoBehaviour {
     SpriteRenderer spriteRenderer;
     CircleCollider2D hitbox;
 
-    public static float defaultLifeTime = 3f;
+    public static float defaultLifeTime = 10f;
 
     public Type type;
     public Vector2 velocity;

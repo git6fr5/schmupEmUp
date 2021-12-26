@@ -134,12 +134,12 @@ GameObject:
   - component: {fileID: 565794372}
   - component: {fileID: 565794371}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Beam
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!120 &565794371
 LineRenderer:
   m_ObjectHideFlags: 0
@@ -461,6 +461,18 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2500387159476629733, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
+      propertyPath: m_Color.r
+      value: 0.48900002
+      objectReference: {fileID: 0}
+    - target: {fileID: 2500387159476629733, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
+      propertyPath: m_Color.g
+      value: 0.48900002
+      objectReference: {fileID: 0}
+    - target: {fileID: 2500387159476629733, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
+      propertyPath: m_Color.b
+      value: 0.48900002
+      objectReference: {fileID: 0}
     - target: {fileID: 4576858996010440800, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
       propertyPath: m_DynamicOccludee
       value: 0
@@ -469,17 +481,17 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7648923872424181266, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
+    - target: {fileID: 5712125997742744512, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
+      propertyPath: m_Color.r
+      value: 0.2264151
       objectReference: {fileID: 0}
-    - target: {fileID: 7648923872424181266, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
+    - target: {fileID: 5712125997742744512, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
+      propertyPath: m_Color.g
+      value: 0.2264151
       objectReference: {fileID: 0}
-    - target: {fileID: 7648923872424181266, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -1
+    - target: {fileID: 5712125997742744512, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
+      propertyPath: m_Color.b
+      value: 0.2264151
       objectReference: {fileID: 0}
     - target: {fileID: 7750327014985813581, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
       propertyPath: m_FillPixelPerUnit
@@ -491,7 +503,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8612845814537346986, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8612845814537346988, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
       propertyPath: m_SortingOrder
@@ -506,12 +518,8 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8612845814537346989, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
-      propertyPath: spawnTurrets
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8612845814537346989, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
-      propertyPath: tankCount
-      value: 1
+      propertyPath: randomLength.max
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 8612845814537346990, guid: 50a70caa3b82c3a47b78762085534f43, type: 3}
       propertyPath: m_LocalPosition.x

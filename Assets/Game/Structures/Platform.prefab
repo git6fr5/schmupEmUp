@@ -71,7 +71,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 6655847697075510515, guid: 84ced0b416164174685394c00806158f, type: 3}
+  m_Sprite: {fileID: 21300000, guid: d760ff332c08a8848b7d9ab742310037, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -276,7 +276,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 362f7d09c8172ab4493ec3fbf3d3e9a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sprites: []
+  sprites:
+  - {fileID: -702417484383542198, guid: 2713792ed5551a44c93ef348dfc73c2d, type: 3}
   index: 0
   type: 0
   velocity: {x: 0, y: 0}
@@ -409,7 +410,7 @@ LineRenderer:
     shadowBias: 0.5
     generateLightingData: 0
   m_UseWorldSpace: 1
-  m_Loop: 0
+  m_Loop: 1
 --- !u!1 &8543751435770673644
 GameObject:
   m_ObjectHideFlags: 0
@@ -522,7 +523,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 362f7d09c8172ab4493ec3fbf3d3e9a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sprites: []
+  sprites:
+  - {fileID: -702417484383542198, guid: 2713792ed5551a44c93ef348dfc73c2d, type: 3}
   index: 0
   type: 0
   velocity: {x: 0, y: 0}
@@ -592,24 +594,21 @@ MonoBehaviour:
   orderedPoints: []
   pathPoints: []
   generate: 1
-  render: 1
-  debug: 0
-  detail: 1
-  path: 1
-  draw: 1
+  debugLines: 1
+  debugSquares: 0
+  pathInset: 2
   design: 1
   tank: {fileID: 8612845814866782919}
-  tankCount: 3
+  tankCount: 5
   tankSpawnInterval: 1.5
   spawnTanks: 0
-  maxTurrets: 5
+  maxTurrets: 3
   turret: {fileID: 8612845814574893043}
-  spawnTurrets: 1
-  thresholdDistance: 0.25
-  outline: {fileID: 6285769368366416188}
-  distances: []
+  spawnTurrets: 0
   meshFilter: {fileID: 8612845814760056581}
-  color: {r: 0.5019608, g: 0.5019608, b: 0.5019608, a: 0}
+  outline: {fileID: 6285769368366416188}
+  pathline: {fileID: 4614695565038802147}
+  backgroundColor: {r: 0.397, g: 0.397, b: 0.397, a: 0}
   rightNode: {x: 0, y: 0, z: 0}
   leftNode: {x: 0, y: 0, z: 0}
   shift: 0
@@ -620,8 +619,11 @@ MonoBehaviour:
   - {fileID: 1483498245930482102, guid: 84ced0b416164174685394c00806158f, type: 3}
   - {fileID: 8179935050504990152, guid: 84ced0b416164174685394c00806158f, type: 3}
   - {fileID: -3929488353869561957, guid: 84ced0b416164174685394c00806158f, type: 3}
-  - {fileID: 0}
-  designDensity: 0.25
+  - {fileID: 9500142001331934, guid: 84ced0b416164174685394c00806158f, type: 3}
+  - {fileID: -2444720814727284670, guid: 84ced0b416164174685394c00806158f, type: 3}
+  - {fileID: -2702101615204461824, guid: 84ced0b416164174685394c00806158f, type: 3}
+  outlineSprite: {fileID: 21300000, guid: 8ea3b9fc33296fc4994268baa38bd0ad, type: 3}
+  designDensity: 0.78
 --- !u!1 &8612845814574893041
 GameObject:
   m_ObjectHideFlags: 0
@@ -648,7 +650,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8612845814574893041}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.23211, y: 0.8423742, z: -1.8264226}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 2197854352295368676}
@@ -829,7 +831,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8612845814866782918}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.23211, y: 0.8423742, z: -1.8264226}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 3153607320394931389}
@@ -929,15 +931,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7648923872424181266}
-  - component: {fileID: 4576858996010440800}
-  - component: {fileID: 7750327014985813581}
+  - component: {fileID: 4614695565038802147}
   m_Layer: 0
   m_Name: Path
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &7648923872424181266
 Transform:
   m_ObjectHideFlags: 0
@@ -946,33 +947,32 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9213690333816804807}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 18.304659, y: 111.405014, z: -5.5735307}
+  m_LocalPosition: {x: 0, y: 0, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 8612845814537346990}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1971053207 &4576858996010440800
-SpriteShapeRenderer:
+--- !u!120 &4614695565038802147
+LineRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9213690333816804807}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
-  m_DynamicOccludee: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_DynamicOccludee: 1
+  m_MotionVectors: 0
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: b0b5d5ef2e7a2b84c986fd143f2fc861, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -985,7 +985,7 @@ SpriteShapeRenderer:
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
   m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 0
+  m_SelectedEditorRenderState: 3
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
@@ -993,84 +993,61 @@ SpriteShapeRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_MaskInteraction: 0
-  m_ShapeTexture: {fileID: 0}
-  m_Sprites:
-  - {fileID: -3581976698263530145, guid: 84ced0b416164174685394c00806158f, type: 3}
-  - {fileID: -3581976698263530145, guid: 84ced0b416164174685394c00806158f, type: 3}
-  - {fileID: -3581976698263530145, guid: 84ced0b416164174685394c00806158f, type: 3}
-  - {fileID: -3581976698263530145, guid: 84ced0b416164174685394c00806158f, type: 3}
-  m_LocalAABB:
-    m_Center: {x: 0, y: 0, z: -0.00020005}
-    m_Extent: {x: 2, y: 2, z: 0.00020005}
---- !u!114 &7750327014985813581
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9213690333816804807}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 90539df1cd5704abcb25fec9f3f5f84b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Spline:
-    m_IsOpenEnded: 0
-    m_ControlPoints:
-    - position: {x: -1, y: -1, z: 0}
-      leftTangent: {x: 0, y: 0, z: 0}
-      rightTangent: {x: 0, y: 0, z: 0}
-      mode: 0
-      height: 1
-      bevelCutoff: 0
-      bevelSize: 0
-      spriteIndex: 0
-      corner: 0
-      m_CornerMode: 1
-    - position: {x: -1, y: 1, z: 0}
-      leftTangent: {x: 0, y: 0, z: 0}
-      rightTangent: {x: 0, y: 0, z: 0}
-      mode: 0
-      height: 1
-      bevelCutoff: 0
-      bevelSize: 0
-      spriteIndex: 0
-      corner: 0
-      m_CornerMode: 1
-    - position: {x: 1, y: 1, z: 0}
-      leftTangent: {x: 0, y: 0, z: 0}
-      rightTangent: {x: 0, y: 0, z: 0}
-      mode: 0
-      height: 1
-      bevelCutoff: 0
-      bevelSize: 0
-      spriteIndex: 0
-      corner: 0
-      m_CornerMode: 1
-    - position: {x: 1, y: -1, z: 0}
-      leftTangent: {x: 0, y: 0, z: 0}
-      rightTangent: {x: 0, y: 0, z: 0}
-      mode: 0
-      height: 1
-      bevelCutoff: 0
-      bevelSize: 0
-      spriteIndex: 0
-      corner: 0
-      m_CornerMode: 1
-  m_SpriteShape: {fileID: 11400000, guid: ea2b0c4e15fc68147a7e54fdc4632786, type: 2}
-  m_FillPixelPerUnit: 100
-  m_StretchTiling: 1
-  m_SplineDetail: 16
-  m_AdaptiveUV: 1
-  m_StretchUV: 0
-  m_WorldSpaceUV: 0
-  m_CornerAngleThreshold: 30
-  m_ColliderDetail: 16
-  m_ColliderOffset: 0
-  m_UpdateCollider: 1
-  m_OptimizeCollider: 1
-  m_OptimizeGeometry: 1
-  m_EnableTangents: 0
-  m_GeometryCached: 0
+  m_Positions:
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 1}
+  m_Parameters:
+    serializedVersion: 3
+    widthMultiplier: 1
+    widthCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    colorGradient:
+      serializedVersion: 2
+      key0: {r: 1, g: 1, b: 1, a: 1}
+      key1: {r: 1, g: 1, b: 1, a: 1}
+      key2: {r: 0, g: 0, b: 0, a: 0}
+      key3: {r: 0, g: 0, b: 0, a: 0}
+      key4: {r: 0, g: 0, b: 0, a: 0}
+      key5: {r: 0, g: 0, b: 0, a: 0}
+      key6: {r: 0, g: 0, b: 0, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 0
+      ctime1: 65535
+      ctime2: 0
+      ctime3: 0
+      ctime4: 0
+      ctime5: 0
+      ctime6: 0
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_NumColorKeys: 2
+      m_NumAlphaKeys: 2
+    numCornerVertices: 0
+    numCapVertices: 0
+    alignment: 0
+    textureMode: 1
+    shadowBias: 0.5
+    generateLightingData: 0
+  m_UseWorldSpace: 1
+  m_Loop: 1

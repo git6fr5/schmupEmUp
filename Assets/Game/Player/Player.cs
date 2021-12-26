@@ -36,6 +36,8 @@ public class Player : MonoBehaviour {
     private Camera viewCam;
     public Vector2 viewOffset;
 
+    bool knockback = false;
+
     public float ropeLength;
     public float weight;
     private int segmentCount; // The number of segments.
@@ -71,6 +73,11 @@ public class Player : MonoBehaviour {
 
     // Movement mechanic
     void Move() {
+
+        if (knockback) {
+            transform.position += (Vector3)velocity * Time.deltaTime;
+            return; 
+        }
 
         // Damping
         velocity *= damping;
@@ -114,7 +121,7 @@ public class Player : MonoBehaviour {
     }
 
     void Collision() {
-        print("hello");
+        // print("hello");
 
         float radius = 0.3f;
         Collider2D[] collisions = Physics2D.OverlapCircleAll(transform.position, radius);
@@ -137,8 +144,25 @@ public class Player : MonoBehaviour {
 
                 }
             }
+
+            Cliff cliff = collisions[i].GetComponent<Cliff>();
+            if (cliff != null) {
+                print("HITTING CLIFF");
+                Respawn();
+                if (!knockback) {
+                    StartCoroutine(IEKnockback());
+                }
+            }
         }
             
+    }
+
+    private IEnumerator IEKnockback() {
+        velocity = Quaternion.Euler(0f, 0f, 180f) * velocity * 2f;
+        knockback = true;
+        yield return new WaitForSeconds(1f);
+        knockback = false;
+        yield return null;
     }
 
     private void ChangeColor(int bulletType) {
@@ -264,7 +288,7 @@ public class Player : MonoBehaviour {
 
         ropeSegments[0] = transform.position;
         for (int i = 1; i < ropeSegments.Length; i++) {
-            // ropeSegments[i] += GameRules.ScrollSpeed / 2f * Vector3.up * Time.deltaTime;
+            ropeSegments[i] += GameRules.ScrollSpeed / 20f * Vector3.up * Time.deltaTime;
             ropeSegments[i] += (Vector3)velocity / 20f * Time.deltaTime;
             if ((ropeSegments[i - 1] - ropeSegments[i]).magnitude > SegmentLength) {
                 ropeSegments[i] += (ropeSegments[i - 1] - ropeSegments[i]).normalized * Time.deltaTime * 5f;
@@ -275,11 +299,11 @@ public class Player : MonoBehaviour {
             Constraints();
         }
 
-        for (int i = 1; i < ropeSegments.Length; i++) {
-            if ((ropeSegments[i - 1] - ropeSegments[i]).magnitude < SegmentLength * 0.95f) {
-                ropeSegments[i] = ropeSegments[i - 1] + (SegmentLength * 0.95f) * ((ropeSegments[i] - ropeSegments[i-1]).normalized);
-            }
-        }
+        //for (int i = 1; i < ropeSegments.Length; i++) {
+        //    if ((ropeSegments[i - 1] - ropeSegments[i]).magnitude < SegmentLength * 0.95f) {
+        //        ropeSegments[i] = ropeSegments[i - 1] + (SegmentLength * 0.95f) * ((ropeSegments[i] - ropeSegments[i-1]).normalized);
+        //    }
+        //}
 
         tailRenderer.startWidth = tailStartWidth;
         tailRenderer.endWidth = tailEndWidth;
@@ -305,6 +329,7 @@ public class Player : MonoBehaviour {
             }
             ropeSegments[i] += errorVector * 0.5f;
         }
+        ropeSegments[0] = transform.position;
     }
 
     private float highlightTicks = 0f;

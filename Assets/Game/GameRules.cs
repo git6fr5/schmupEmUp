@@ -6,8 +6,16 @@ public class GameRules : MonoBehaviour {
 
     public static float ParrallaxMax = 100f;
     public static float TunnelDepth = 100f;
-    public static float BeamDepth = 70f;
+    public static float BeamDepth = 60f;
+
+    public static float PlatformShadow = 55f;
     public static float PlatformDepth = 50f;
+    public static float PlatformDesigns = 49f;
+    public static float PlatformOutline = 48f;
+    public static float PlatformEnemies = 45f;
+
+    public static float CliffShadowDepth = 95f;
+    public static float CliffSideDepth = 22f;
     public static float CliffDepth = 20f;
 
     public static string Path = "Assets/Resources/";
@@ -85,6 +93,10 @@ public class GameRules : MonoBehaviour {
         rotationRate += rotationAcceleration * Time.deltaTime;
         MainCamera.transform.position += ScrollSpeed * Vector3.up * Time.deltaTime;
         MainCamera.transform.eulerAngles += Vector3.forward * currRotation * Time.deltaTime;
+    }
+
+    public static float GetParrallax(float z) {
+        return Mathf.Pow(z / ParrallaxMax, 2f);
     }
 
     private IEnumerator IEGetRotation() {

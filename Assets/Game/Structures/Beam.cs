@@ -17,21 +17,25 @@ public class Beam : MonoBehaviour {
     public void Init(int index) {
         index = index % beamMaterials.Length;
         lineRenderer.materials = new Material[1] { beamMaterials[index] };
-        leftNode.z = GameRules.BeamDepth + 5f * index;
-        rightNode.z = GameRules.BeamDepth + 5f * index;
-        parrallaxFactor = (leftNode.z / GameRules.ParrallaxMax);
+        leftNode.z = GameRules.BeamDepth + 10f * index;
+        rightNode.z = GameRules.BeamDepth + 10f * index;
+        parrallaxFactor = GameRules.GetParrallax(leftNode.z);
 
         Draw();
     }
 
     void Update() {
         Draw();
+
+        if (leftNode.y < GameRules.MainCamera.transform.position.y - GameRules.ScreenPixelHeight / GameRules.PixelsPerUnit - 25f) {
+            Destroy(gameObject);
+        }
     }
 
     void Draw() {
 
-        //rightNode += parrallaxFactor * GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
-        //leftNode += parrallaxFactor * GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
+        rightNode += parrallaxFactor * GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
+        leftNode += parrallaxFactor * GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
 
         lineRenderer.startWidth = beamWidth;
         lineRenderer.endWidth = beamWidth;

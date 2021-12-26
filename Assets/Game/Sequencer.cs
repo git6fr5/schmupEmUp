@@ -6,6 +6,10 @@ using RandomParams = GameRules.RandomParams;
 
 public class Sequencer : MonoBehaviour {
 
+    public bool isTimed;
+    public float duration;
+    public float lull;
+
     [System.Serializable]
     public class SequenceComponent {
 
@@ -33,7 +37,20 @@ public class Sequencer : MonoBehaviour {
                 }
             }
             sequenceObject.SetActive(false);
+            isRunning = false;
         }
+
+        public void Reset() {
+            foreach (Transform child in sequenceObject.transform) {
+                Wave wave = child.GetComponent<Wave>();
+                // Can just turn it off after its complete right?
+                // Don't need to wait till its cleared...
+                if (wave != null) {
+                    wave.reset = true;
+                }
+            }
+        }
+
     }
 
     [System.Serializable]
@@ -61,7 +78,7 @@ public class Sequencer : MonoBehaviour {
         private void Generate(Tunnel tunnel) {
 
             // Get the index.
-            int increment = 30;
+            int increment = 50;
             int index = (tunnel.cameraIndex - tunnel.startIndex) + increment;
             if (index >= tunnel.segments.Length) {
                 index = tunnel.segments.Length - 1;
@@ -77,12 +94,15 @@ public class Sequencer : MonoBehaviour {
                 newPlatform.transform.position = tunnel.segments[index].leftPointA;
             }
 
+            newPlatform.transform.position -= Vector3.forward * (GameRules.TunnelDepth - GameRules.PlatformDepth);
             newPlatform.shift = true;
             newPlatform.shiftRight = right;
 
             // The type of enemy.
             newPlatform.spawnTurrets = Random.Range(0f, 1f) < turretLikelihood;
-            newPlatform.spawnTanks = Random.Range(0f, 1f) < tankLikelihood;
+            if (!newPlatform.spawnTurrets) {
+                newPlatform.spawnTanks = true; // Random.Range(0f, 1f) < tankLikelihood;
+            }
 
             newPlatform.gameObject.SetActive(true);
 
@@ -105,6 +125,9 @@ public class Sequencer : MonoBehaviour {
             StartCoroutine(IESequence(sequenceComponents[i]));
         }
 
+        platformDistribution.turretLikelihood /= (platformDistribution.turretLikelihood + platformDistribution.tankLikelihood);
+        platformDistribution.tankLikelihood /= (platformDistribution.turretLikelihood + platformDistribution.tankLikelihood);
+
     }
 
     private IEnumerator IESequence(SequenceComponent component) {
@@ -113,6 +136,8 @@ public class Sequencer : MonoBehaviour {
         yield return null;
     }
 
+
+    public bool isFinished;
     // Update is called once per frame
     void Update() {
 
@@ -125,6 +150,14 @@ public class Sequencer : MonoBehaviour {
 
         platformDistribution.Check(tunnel);
 
+        // Check the whole thing is done.
+        isFinished = true;
+        for (int i = 0; i < sequenceComponents.Length; i++) {
+            if (sequenceComponents[i].isRunning) {
+                isFinished = false;
+            }
+        }
+
     }
 
     // The natural scrolling
@@ -132,4 +165,11 @@ public class Sequencer : MonoBehaviour {
         transform.position = trackCam.transform.position;
         transform.position -= transform.position.z * Vector3.forward;
     }
+
+    public void Reset() {
+        for (int i = 0; i < sequenceComponents.Length; i++) {
+            sequenceComponents[i].Reset();
+        }
+    }
+
 }

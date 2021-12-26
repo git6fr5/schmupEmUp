@@ -53,12 +53,17 @@ public class Platform : MonoBehaviour {
             rightPointB = midPoint + new Vector3(width / 2f, -length / 2f, 0f);
 
             if (debug) {
-                Debug.DrawLine(leftPointA , leftPointB , debugColor, Time.deltaTime, false);
-                Debug.DrawLine(leftPointA , rightPointA , debugColor, Time.deltaTime, false);
-                Debug.DrawLine(leftPointB , rightPointB , debugColor, Time.deltaTime, false);
-                Debug.DrawLine(rightPointA , rightPointB , debugColor, Time.deltaTime, false);
+                Debug.DrawLine(leftPointA, leftPointB, debugColor, Time.deltaTime, false);
+                Debug.DrawLine(leftPointA, rightPointA, debugColor, Time.deltaTime, false);
+                Debug.DrawLine(leftPointB, rightPointB, debugColor, Time.deltaTime, false);
+                Debug.DrawLine(rightPointA, rightPointB, debugColor, Time.deltaTime, false);
 
             }
+
+            leftPointA.z = GameRules.PlatformDepth;
+            leftPointB.z = GameRules.PlatformDepth;
+            rightPointA.z = GameRules.PlatformDepth;
+            rightPointB.z = GameRules.PlatformDepth;
 
         }
 
@@ -77,16 +82,31 @@ public class Platform : MonoBehaviour {
     public Vector3[] pathPoints;
 
     public bool generate;
-    public bool render;
-    public bool debug;
-    public bool detail;
-    public bool path;
-    public bool draw;
+    public bool debugLines;
+    public bool debugSquares;
+    public float pathInset;
+
     public bool design;
+
+    public Tank tank;
+    public int tankCount;
+    public float tankSpawnInterval;
+    public bool spawnTanks;
+
+    public int maxTurrets;
+    public Turret turret;
+    public bool spawnTurrets;
+
+    public MeshFilter meshFilter;
+    public LineRenderer outline;
+    public LineRenderer pathline;
+    public Color backgroundColor;
 
     private bool doneDetailing = false;
 
     void Update() {
+
+        Move();
 
         if (segmentCount != segments.Length) {
             PlatformSegment[] temp = new PlatformSegment[segmentCount];
@@ -110,81 +130,89 @@ public class Platform : MonoBehaviour {
         }
 
         for (int i = 0; i < segments.Length; i++) {
-            segments[i].Draw(debug, Color.yellow);
+            segments[i].Draw(debugSquares, Color.yellow);
         }
 
         if (generate) {
-            Generate();
+            CleanInside();
+            if (spawnTurrets) {
+                Detail();
+            }
             generate = false;
-            path = true;
         }
 
         if (orderedPoints != null && orderedPoints.Length > 0) {
 
             Node();
 
-            if (path) {
+            if (spawnTanks) {
                 Path();
-                path = false;
-            }
-
-            if (detail) {
-                doneDetailing = false;
-                Detail();
-                detail = false;
-            }
-
-            if (draw) {
-                Draw(); // Draws the spriteshape
-                draw = false;
-            }
-
-            if (pathPoints != null && pathPoints.Length > 0 && spawnTanks) {
+                Render();
                 StartCoroutine(IESpawn());
                 spawnTanks = false;
             }
 
-            if (details != null && details.Count > 0 && doneDetailing) {
-
-                if (design) {
-                    Design();
-                    design = false;
-                }
-
-                if (spawnTurrets) {
-                    SpawnTurrets();
-                    spawnTurrets = false;
-                }
+            if (details != null && details.Count > 0 && doneDetailing && spawnTurrets) {
+                Design();
+                SpawnTurrets();
+                spawnTurrets = false;
             }
 
-            if (render) {
-                // Render(0, segments.Length);
-                Render();
+            if (debugLines) {
+                DebugLines();
+            }
+
+        }
+
+        if (transform.position.y < GameRules.MainCamera.transform.position.y - GameRules.ScreenPixelHeight / GameRules.PixelsPerUnit - 50f) {
+            Destroy(gameObject);
+        }
+
+    }
+
+    private void Move() {
+
+        Vector3 diff = GameRules.ScrollSpeed * Time.deltaTime * Vector3.up * GameRules.GetParrallax(GameRules.PlatformDepth);
+        //for (int i = 0; i < orderedPoints.Length; i++) {
+        //    orderedPoints[]
+        //}
+
+        transform.position += diff;
+
+        if (orderedPoints != null && orderedPoints.Length > 0) {
+            for (int i = 0; i < orderedPoints.Length; i++) {
+                orderedPoints[i] += diff;
+            }
+
+        }
+
+        if (pathPoints != null && pathPoints.Length > 0) {
+            for (int i = 0; i < pathPoints.Length; i++) {
+                pathPoints[i] += diff;
+            }
+            RenderOutline();
+        }
+
+        if (details != null && details.Count > 0) {
+            for (int i = 0; i < details.Count; i++) {
+                details[i].midPoint += diff;
             }
 
         }
 
     }
-
-    public Tank tank;
-    public int tankCount;
-    public float tankSpawnInterval;
-    public bool spawnTanks;
 
     private IEnumerator IESpawn() {
 
         bool blue = Random.Range(0f, 1f) > 0.5f;
+        int spawnIndex = Random.Range(0, pathPoints.Length);
 
         for (int i = 0; i < tankCount; i++) {
-            Tank newTank = Instantiate(tank.gameObject, pathPoints[0], Quaternion.identity, null).GetComponent<Tank>();
+            Tank newTank = Instantiate(tank.gameObject, pathPoints[spawnIndex], Quaternion.identity, transform).GetComponent<Tank>();
             newTank.Init(pathPoints, blue);
             yield return new WaitForSeconds(tankSpawnInterval);
         }
     }
-
-    public int maxTurrets;
-    public Turret turret;
-    public bool spawnTurrets;
 
     private void SpawnTurrets() {
 
@@ -192,51 +220,47 @@ public class Platform : MonoBehaviour {
 
         bool blue = Random.Range(0f, 1f) > 0.5f;
 
-        for (int i = 0; i < maxTurrets; i++) {
-
-            int index = Random.Range(0, details.Count);
-            if (!indices.Contains(index)) {
-                indices.Add(index);
+        for (int i = 0; i < details.Count; i++) {
+            if (shiftRight) {
+                if (details[i].midPoint.x < transform.position.x) {
+                    indices.Add(i);
+                }
             }
+            else {
+                if (details[i].midPoint.x > transform.position.x) {
+                    indices.Add(i);
+                }
+            }
+
         }
 
-        for (int i = 0; i < indices.Count; i++) {
 
+        maxTurrets = (int)Mathf.Min(maxTurrets, indices.Count);
+        for (int i = 0; i < maxTurrets; i++) {
+
+            int index = Random.Range(0, indices.Count);
             Turret newTurret = Instantiate(turret.gameObject).GetComponent<Turret>();
-            newTurret.transform.position = details[indices[i]].midPoint;
+            newTurret.transform.position = details[indices[index]].midPoint;
             newTurret.gameObject.SetActive(true);
-            newTurret.Init(blue);
+            newTurret.Init(blue, details[indices[index]]);
+            indices.RemoveAt(index);
+
         }
 
     }
 
 
-    public float thresholdDistance;
     private void Path() {
 
         pathPoints = new Vector3[orderedPoints.Length];
         for (int i = 0; i < orderedPoints.Length; i++) {
-            pathPoints[i] = orderedPoints[i] - ((orderedPoints[i] - transform.position).normalized * 1f);
+            Vector3 direction = (Vector3)((Vector2)orderedPoints[i] - (Vector2)transform.position).normalized;
+            pathPoints[i] = orderedPoints[i] - (direction * pathInset);
         }
-
-        //List<Vector3> cleanPath = new List<Vector3>();
-        //float dist = 0f;
-        //cleanPath.Add(pathPoints[0]);
-        //for (int i = 1; i < pathPoints.Length; i++) {
-        //    dist += (pathPoints[i - 1] - pathPoints[i]).magnitude;
-        //    print(dist);
-        //    if (dist > thresholdDistance) {
-        //        cleanPath.Add(pathPoints[i]);
-        //        dist = dist - thresholdDistance;
-        //    }
-        //}
-        //pathPoints = cleanPath.ToArray();
-
-        
 
     }
 
-    private void Render() {
+    private void DebugLines() {
 
         for (int i = 1; i < orderedPoints.Length; i++) {
             Debug.DrawLine(orderedPoints[i - 1], orderedPoints[i], Color.red, Time.deltaTime, false);
@@ -264,7 +288,7 @@ public class Platform : MonoBehaviour {
 
     }
 
-    private void Generate() {
+    private void CleanInside() {
         // Collect all the points
         List<Vector3> allPoints = new List<Vector3>();
         for (int i = 0; i < segments.Length; i++) {
@@ -298,68 +322,67 @@ public class Platform : MonoBehaviour {
         Array.Sort<Vector3>(orderedPoints, new Comparison<Vector3>((vectorA, vectorB) => Compare(vectorA, vectorB)));
     }
 
-    public LineRenderer outline;
-    public float[] distances;
-    public MeshFilter meshFilter;
-    public Color color;
-    private void Draw() {
+    private void Render() {
+        RenderOutline();
+        RenderFace();
+    }
 
-        distances = new float[orderedPoints.Length];
-        List<Vector3> cleanPath = new List<Vector3>();
-        float dist = 0f;
-        cleanPath.Add(orderedPoints[0]);
-        for (int i = 1; i < orderedPoints.Length; i++) {
-            dist += (orderedPoints[i - 1] - orderedPoints[i]).magnitude;
-            distances[i] = (orderedPoints[i - 1] - orderedPoints[i]).magnitude;
-            print(dist);
-            if (dist > thresholdDistance) {
-                cleanPath.Add(orderedPoints[i]);
-                dist = dist - thresholdDistance;
-            }
-        }
-
-        outline.startWidth = 1f;
-        outline.endWidth = 1f;
-        outline.positionCount = cleanPath.Count;
-
-        outline.SetPositions(cleanPath.ToArray());
-
-
+    private void RenderFace() {
         if (meshFilter.mesh == null) {
             meshFilter.mesh = new Mesh();
         }
 
         List<Vector3> positions = new List<Vector3>();
-        for (int i = 0; i < cleanPath.Count; i++) {
-            positions.Add(cleanPath[i] - transform.localPosition);
-        }
-
-        positions.Add(Vector3.zero);
-
         List<int> indices = new List<int>();
         List<Color> colors = new List<Color>();
 
-        int index = 0;
-        for (int i = 1; i < cleanPath.Count; i++) {
+        positions.Add(orderedPoints[0] - transform.localPosition);
+        colors.Add(backgroundColor);
 
-            indices.Add(positions.Count - 1);
+        for (int i = 1; i < orderedPoints.Length; i++) {
+
+            positions.Add(orderedPoints[i] - transform.localPosition);
+
+            indices.Add(orderedPoints.Length);
             indices.Add(i - 1);
             indices.Add(i);
 
+            colors.Add(backgroundColor);
+
         }
+
+        Vector3 center = transform.position;
+        center.z = GameRules.PlatformDepth;
+        positions.Add(center - transform.localPosition);
 
         indices.Add(positions.Count - 1);
-        indices.Add(cleanPath.Count - 1);
+        indices.Add(orderedPoints.Length - 1);
         indices.Add(0);
 
-        for (int i = 0; i < positions.Count; i++) {
-            colors.Add(color);
-        }
+        colors.Add(backgroundColor);
 
         meshFilter.mesh.SetVertices(positions);
         meshFilter.mesh.SetIndices(indices.ToArray(), MeshTopology.Triangles, 0);
         meshFilter.mesh.colors = colors.ToArray();
+    }
 
+    private void RenderOutline() {
+        outline.startWidth = 1f;
+        outline.endWidth = 1f;
+        outline.positionCount = orderedPoints.Length;
+        outline.SetPositions(orderedPoints);
+
+        List<Vector3> shadowLine = new List<Vector3>();
+        for (int i = 0; i < orderedPoints.Length; i++) {
+            Vector3 shadowPoint = orderedPoints[i] + Vector3.down * 1f;
+            shadowPoint.z = GameRules.PlatformShadow;
+            shadowLine.Add(shadowPoint);
+        }
+
+        pathline.startWidth = 1.75f;
+        pathline.endWidth = 1.75f;
+        pathline.positionCount = shadowLine.Count;
+        pathline.SetPositions(shadowLine.ToArray());
     }
 
     public int Compare(Vector3 vA, Vector3 vB) {
@@ -382,10 +405,6 @@ public class Platform : MonoBehaviour {
     private float topMost;
 
     private void Detail() {
-
-        //if (pathPoints == null || pathPoints.Length < 1) {
-        //    return;
-        //}
 
         details = new List<PlatformSegment>();
 
@@ -413,18 +432,13 @@ public class Platform : MonoBehaviour {
         // Generate all the possible squares
         int scale = 2;
 
-        for (int i = (int)Mathf.Ceil(bottomMost); i < (int)Mathf.Floor(topMost); i+= scale) {
+        for (int i = (int)Mathf.Ceil(bottomMost); i < (int)Mathf.Floor(topMost); i += scale) {
 
-            for (int j = (int)Mathf.Ceil(leftMost); j < (int)Mathf.Floor(rightMost); j+= scale) {
+            for (int j = (int)Mathf.Ceil(leftMost); j < (int)Mathf.Floor(rightMost); j += scale) {
 
                 float _scale = (float)scale;
                 float y = (float)i; float x = (float)j;
                 Vector3 center = new Vector3(x + _scale / 2f, y + _scale / 2f, 0f);
-
-                //Vector3 a = new Vector3(x, y, 0f);
-                //Vector3 b = new Vector3(x + 1f, y, 0f);
-                //Vector3 c = new Vector3(x, y + 1f, 0f);
-                //Vector3 d = new Vector3(x + 1f, y + 1f, 0f);
 
                 PlatformSegment newSegment = new PlatformSegment();
                 newSegment.Set(center, _scale, _scale);
@@ -439,7 +453,8 @@ public class Platform : MonoBehaviour {
             details[i].Draw(true, Color.blue);
         }
 
-        StartCoroutine(IEInteriorGrid());
+        doneDetailing = true;
+        // StartCoroutine(IEInteriorGrid());
 
     }
 
@@ -469,7 +484,7 @@ public class Platform : MonoBehaviour {
                 bool b = CheckIntersect(details[i].leftPointA, details[i].rightPointA, n1, n2);
                 bool c = CheckIntersect(details[i].leftPointB, details[i].rightPointB, n1, n2);
                 bool d = CheckIntersect(details[i].rightPointA, details[i].rightPointB, n1, n2);
-                
+
                 if (a || b || c || d) {
                     detailIsContained = false;
                     break;
@@ -571,7 +586,11 @@ public class Platform : MonoBehaviour {
     [HideInInspector] public bool shift;
     [HideInInspector] public bool shiftRight;
 
+    public bool attached = false;
+
     private void Node() {
+
+        if (attached) { return; }
 
         rightNode = new Vector3(rightMost - 2f, (topMost + bottomMost) / 2f, 0f);
         leftNode = new Vector3(leftMost + 2f, (topMost + bottomMost) / 2f, 0f);
@@ -595,21 +614,31 @@ public class Platform : MonoBehaviour {
             }
         }
 
+        attached = true;
+
     }
 
     public SpriteRenderer spriteBase;
     public Sprite[] designs;
+    public Sprite outlineSprite;
     public float designDensity;
     private void Design() {
         for (int i = 0; i < details.Count; i++) {
-                SpriteRenderer newSprite = Instantiate(spriteBase.gameObject, details[i].midPoint, Quaternion.identity, transform).GetComponent<SpriteRenderer>();
+            SpriteRenderer newSprite = Instantiate(spriteBase.gameObject, details[i].midPoint, Quaternion.identity, transform).GetComponent<SpriteRenderer>();
             if (Random.Range(0f, 1f) < designDensity) {
                 newSprite.sprite = designs[Random.Range(0, designs.Length - 1)];
             }
             else {
                 newSprite.sprite = designs[designs.Length - 1];
             }
+            newSprite.transform.position = new Vector3(details[i].midPoint.x, details[i].midPoint.y, GameRules.PlatformDesigns);
             newSprite.gameObject.SetActive(true);
+
+            SpriteRenderer outlineSprite = Instantiate(spriteBase.gameObject, details[i].midPoint, Quaternion.identity, transform).GetComponent<SpriteRenderer>();
+            outlineSprite.sprite = this.outlineSprite;
+            outlineSprite.transform.position = new Vector3(details[i].midPoint.x, details[i].midPoint.y, GameRules.PlatformDesigns + 1);
+            outlineSprite.gameObject.SetActive(true);
+
         }
     }
 

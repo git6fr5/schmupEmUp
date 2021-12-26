@@ -88,10 +88,7 @@ public class Tunnel : MonoBehaviour {
     public TunnelSegment[] segments;
 
     public bool render;
-    public bool renderRange;
     public Color backgroundColor;
-    public MeshFilter meshFilter;
-
 
     private Vector3 initialLeftNode;
     private Vector3 initialRightNode;
@@ -191,74 +188,18 @@ public class Tunnel : MonoBehaviour {
         }
 
         if (render) {
-            RenderLines();
+            // RenderLines();
             Beams();
             render = false;
         }
 
     }
 
-    void FixedUpdate() {
-    }
-
-    public LineRenderer leftLine;
-    public LineRenderer rightLine;
-
-    private void RenderLines() {
-
-        List<Vector3> leftPoints = new List<Vector3>();
-        List<Vector3> rightPoints = new List<Vector3>();
-
-        for (int i = 0; i < segments.Length; i++) {
-
-            leftPoints.Add(segments[segments.Length - 1-i].leftPointA);
-            rightPoints.Add(segments[i].rightPointA);
-
-        }
-
-        leftLine.startWidth = 1f;
-        leftLine.endWidth = 1f;
-        leftLine.positionCount = segments.Length;
-
-        leftLine.SetPositions(leftPoints.ToArray());
-
-        rightLine.startWidth = 1f;
-        rightLine.endWidth = 1f;
-        rightLine.positionCount = segments.Length;
-
-        rightLine.SetPositions(rightPoints.ToArray());
-
-    }
-
     public Beam beam;
-    public List<int> check = new List<int>();
-
-    private void BeamsB() {
-        print("beams");
-        for (int i = startIndex; i < startIndex + segments.Length; i++) {
-
-            if (!check.Contains(i)) {
-                if ((segments[i - startIndex].leftPointA - segments[i - startIndex].rightPointA).magnitude > 1f) {
-                    if (Random.Range(0f, 1f) < 1f) {
-                        Beam newBeam = Instantiate(beam.gameObject).GetComponent<Beam>();
-                        newBeam.leftNode = segments[i - startIndex].leftPointA;
-                        newBeam.rightNode = segments[i - startIndex].rightPointA;
-                        newBeam.Init(Random.Range(0, 3));
-                        newBeam.gameObject.SetActive(true);
-                    }
-                    check.Add(i);
-                }
-            }
-
-        }
-        
-
-    }
 
     private void Beams() {
-        print("beams");
-        float deltaY = Camera.main.transform.position.y + GameRules.ScreenPixelHeight / GameRules.PixelsPerUnit * 1.5f;
-        for (int i = 0; i < 3; i++) {
+        float deltaY = Camera.main.transform.position.y + GameRules.ScreenPixelHeight / GameRules.PixelsPerUnit;
+        for (int i = 0; i < 20; i++) {
 
             deltaY += Random.Range(0f, 5f);
             Beam newBeam = Instantiate(beam.gameObject).GetComponent<Beam>();
