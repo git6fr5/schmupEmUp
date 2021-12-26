@@ -90,7 +90,9 @@ public class Cliff : MonoBehaviour {
             index += 1;
         }
 
-        print(points.Count);
+        for (int i = 0; i < points.Count; i++) {
+            points[i] = new Vector3(points[i].x, points[i].y, GameRules.CliffDepth);
+        }
 
         meshFilter.mesh.SetVertices(points);
         meshFilter.mesh.SetIndices(indices.ToArray(), MeshTopology.Triangles, 0);

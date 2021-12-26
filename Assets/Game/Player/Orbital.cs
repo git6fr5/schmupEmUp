@@ -12,8 +12,26 @@ public class Orbital : MonoBehaviour {
     public float orbitRadius = 1f;
 
     void Update() {
-        Move();
+        if (Player.MouseAimOrb) {
+            Aim();
+        }
+        else {
+            Move();
+        }
+    }
 
+    private void Aim() {
+
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mousePos.z -= mousePos.z;
+
+        target = mousePos - player.transform.position;
+
+        // Vector3 velocity = -(target - transform.position).normalized * speed;
+        transform.localPosition = target.normalized * orbitRadius;
+
+        //transform.position = player.transform.position + (transform.position - player.transform.position).normalized * orbitRadius;
+        //transform.position += GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
     }
 
     private void Move() {
@@ -38,7 +56,7 @@ public class Orbital : MonoBehaviour {
         }
         target = player.transform.position - displacement;
 
-        Vector3 velocity = (target - transform.position).normalized * speed;
+        Vector3 velocity = -(target - transform.position).normalized * speed;
         // velocity.y *= Mathf.Sign(velocity.y);
         //Vector3 newPosition = transform.position + velocity * Time.deltaTime;
         //float angle = Vector2.SignedAngle(Vector2.down, newPosition);

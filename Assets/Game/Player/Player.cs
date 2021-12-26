@@ -14,7 +14,8 @@ public class Player : MonoBehaviour {
 
     public static Vector3 ViewOffset;
     public static KeyCode InputKey = KeyCode.Space;
-    public static bool MouseAim = false;
+    public static bool MouseAimOrb = true;
+    public static bool MouseAim = true;
 
     [HideInInspector] public SpriteRenderer spriteRenderer;
     CircleCollider2D hitbox;
@@ -249,7 +250,9 @@ public class Player : MonoBehaviour {
         }
     }
 
-    public SpriteShapeController tailShape;
+    public LineRenderer tailRenderer;
+    public float tailStartWidth;
+    public float tailEndWidth;
 
     void SimulationB() {
 
@@ -278,16 +281,10 @@ public class Player : MonoBehaviour {
             }
         }
 
-        tailShape.spline.Clear();
-        for (int i = 0; i < ropeSegments.Length; i++) {
-            // spline.InsertPointAt(i, segments[i].leftPointA - transform.localPosition);
-            tailShape.spline.InsertPointAt(i, ropeSegments[i] - transform.localPosition);
-            tailShape.spline.SetTangentMode(i, ShapeTangentMode.Continuous);
-        }
-
-        // ropeSegments[ropeSegments.Length - 1] =
-        // ropeSegments[i] => 
-        // prevRopeSegments
+        tailRenderer.startWidth = tailStartWidth;
+        tailRenderer.endWidth = tailEndWidth;
+        tailRenderer.positionCount = ropeSegments.Length;
+        tailRenderer.SetPositions(ropeSegments);
 
     }
 

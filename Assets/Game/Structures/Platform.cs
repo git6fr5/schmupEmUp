@@ -298,16 +298,11 @@ public class Platform : MonoBehaviour {
         Array.Sort<Vector3>(orderedPoints, new Comparison<Vector3>((vectorA, vectorB) => Compare(vectorA, vectorB)));
     }
 
-    SpriteShapeController spriteShapeController;
-    public SpriteShapeController pathShapeController;
+    public LineRenderer outline;
     public float[] distances;
     public MeshFilter meshFilter;
     public Color color;
     private void Draw() {
-
-        if (spriteShapeController == null) {
-            spriteShapeController = GetComponent<SpriteShapeController>();
-        }
 
         distances = new float[orderedPoints.Length];
         List<Vector3> cleanPath = new List<Vector3>();
@@ -323,19 +318,12 @@ public class Platform : MonoBehaviour {
             }
         }
 
-        spriteShapeController.spline.Clear();
-        for (int i = 0; i < cleanPath.Count; i++) {
-            // spline.InsertPointAt(i, segments[i].leftPointA - transform.localPosition);
-            spriteShapeController.spline.InsertPointAt(i, cleanPath[i] - transform.localPosition);
-            spriteShapeController.spline.SetTangentMode(i, ShapeTangentMode.Continuous);
-        }
+        outline.startWidth = 1f;
+        outline.endWidth = 1f;
+        outline.positionCount = cleanPath.Count;
 
-        pathShapeController.spline.Clear();
-        for (int i = 0; i < cleanPath.Count; i++) {
-            // spline.InsertPointAt(i, segments[i].leftPointA - transform.localPosition);
-            pathShapeController.spline.InsertPointAt(i, pathPoints[i] - transform.localPosition);
-            pathShapeController.spline.SetTangentMode(i, ShapeTangentMode.Continuous);
-        }
+        outline.SetPositions(cleanPath.ToArray());
+
 
         if (meshFilter.mesh == null) {
             meshFilter.mesh = new Mesh();

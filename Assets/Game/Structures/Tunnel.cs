@@ -65,10 +65,10 @@ public class Tunnel : MonoBehaviour {
             Debug.DrawLine(leftPointA, rightPointA, Color.yellow, Time.deltaTime, false);
             Debug.DrawLine(leftPointB, rightPointB, Color.yellow, Time.deltaTime, false);
 
-            leftPointA -= new Vector3(0f, 0f, leftPointA.z);
-            leftPointB -= new Vector3(0f, 0f, leftPointB.z);
-            rightPointA -= new Vector3(0f, 0f, rightPointA.z);
-            rightPointB -= new Vector3(0f, 0f, rightPointB.z);
+            leftPointA.z = GameRules.TunnelDepth;
+            leftPointB.z = GameRules.TunnelDepth;
+            rightPointA.z = GameRules.TunnelDepth;
+            rightPointB.z = GameRules.TunnelDepth;
 
         }
 
@@ -191,196 +191,42 @@ public class Tunnel : MonoBehaviour {
         }
 
         if (render) {
-            // Render(0, segments.Length);
-            // CreateJaggedSpriteShape();
-            Render(0, segments.Length);
-            CreateContinousSpriteShape();
+            RenderLines();
             Beams();
             render = false;
         }
 
-        if (platforms) {
-            CreatePlatforms();
-            platforms = false;
-        }
     }
 
     void FixedUpdate() {
     }
 
-    void Render(int startIndex, int finalIndex) {
+    public LineRenderer leftLine;
+    public LineRenderer rightLine;
 
-        List<Vector3> points = new List<Vector3>();
-        List<Color> colors = new List<Color>();
-        List<int> indices = new List<int>();
+    private void RenderLines() {
 
-        int index = 0;
-        for (int i = startIndex; i < finalIndex; i++) {
-
-            points.Add(segments[i].leftPointA - transform.localPosition);
-            points.Add(segments[i].rightPointA - transform.localPosition);
-            points.Add(segments[i].leftPointB - transform.localPosition);
-            points.Add(segments[i].rightPointB - transform.localPosition);
-
-            indices.Add(4 * index + 0); // left 1
-            indices.Add(4 * index + 3); // left 2
-            indices.Add(4 * index + 1); // right 1
-
-            indices.Add(4 * index + 0); // right 1
-            indices.Add(4 * index + 2); // right 2
-            indices.Add(4 * index + 3); // left 2
-
-            colors.Add(backgroundColor);
-            colors.Add(backgroundColor);
-            colors.Add(backgroundColor);
-            colors.Add(backgroundColor);
-
-            index += 1;
-        }
-
-        print(points.Count);
-
-        meshFilter.mesh.SetVertices(points);
-        meshFilter.mesh.SetIndices(indices.ToArray(), MeshTopology.Triangles, 0);
-        meshFilter.mesh.colors = colors.ToArray();
-        meshFilter.mesh.RecalculateBounds();
-
-    }
-
-    void DebugLines(int startIndex, int finalIndex, int subdivisions, float length, float width) {
-        for (int i = startIndex; i < finalIndex; i++) {
-            for (int j = 0; j < subdivisions; j++) {
-                Vector3 leftPoint = segments[i].leftPointA + Vector3.up * length * ((float)j) / ((float)subdivisions);
-                Debug.DrawLine(leftPoint, leftPoint + Vector3.left * width, Color.red, Time.fixedDeltaTime, false);
-                RaycastHit2D leftRay = Physics2D.Linecast(leftPoint, leftPoint + Vector3.left * width);
-
-                Vector3 rightPoint = segments[i].rightPointA + Vector3.up * length * ((float)j) / ((float)subdivisions);
-                Debug.DrawLine(rightPoint, rightPoint + Vector3.right * width, Color.red, Time.fixedDeltaTime, false);
-                RaycastHit2D rightRay = Physics2D.Linecast(rightPoint, rightPoint + Vector3.right * width);
-
-                Player playerLeft = leftRay.collider?.GetComponent<Player>();
-                Player playerRight = rightRay.collider?.GetComponent<Player>();
-                if (playerLeft != null) {
-                    print("HITTING A WALL!");
-                    playerLeft.Respawn(false);
-                }
-                else if (playerRight != null) {
-                    print("HITTING A WALL!");
-                    playerRight.Respawn(false);
-                }
-            }
-        }
-
-    }
-
-    // publci 
-    public Spline spline;
-    public SpriteShapeController spriteShapeController;
-
-    public Platform platform;
-    public bool platforms;
-
-    private void CreatePlatforms() {
-
-        bool right = true;
-
-        for (int i = 10; i < segments.Length; i += 10) {
-
-            // Create a platform.
-
-            Platform newPlatform = Instantiate(platform.gameObject).GetComponent<Platform>();
-            if (right) {
-                newPlatform.transform.position = segments[i].rightPointA;
-            }
-            else {
-                newPlatform.transform.position = segments[i].leftPointA;
-            }
-
-            newPlatform.shift = true;
-            newPlatform.shiftRight = right;
-            newPlatform.gameObject.SetActive(true);
-            right = !right;
-
-        }
-
-    }
-
-    private void CreateContinousSpriteShape() {
-
-        if (spriteShapeController == null) {
-            spriteShapeController = GetComponent<SpriteShapeController>();
-        }
-
-        spriteShapeController.spline.Clear();
-        for (int i = 0; i < segments.Length; i++) {
-            // spline.InsertPointAt(i, segments[i].leftPointA - transform.localPosition);
-            spriteShapeController.spline.InsertPointAt(i, segments[i].leftPointA - transform.localPosition);
-            spriteShapeController.spline.SetTangentMode(i, ShapeTangentMode.Continuous);
-        }
-
-        spriteShapeController.spline.InsertPointAt(segments.Length, segments[segments.Length - 1].leftPointB - transform.localPosition);
-        spriteShapeController.spline.InsertPointAt(segments.Length + 1, segments[segments.Length - 1].rightPointB - transform.localPosition);
-
-        spriteShapeController.spline.SetTangentMode(segments.Length, ShapeTangentMode.Continuous);
-        spriteShapeController.spline.SetTangentMode(segments.Length + 1, ShapeTangentMode.Continuous);
-
+        List<Vector3> leftPoints = new List<Vector3>();
+        List<Vector3> rightPoints = new List<Vector3>();
 
         for (int i = 0; i < segments.Length; i++) {
-            // spline.InsertPointAt(i + segments.Length, segments[segments.Length - (i + 1)].rightPointA - transform.localPosition);
-            spriteShapeController.spline.InsertPointAt(i + (segments.Length + 2), segments[segments.Length - (i + 1)].rightPointA - transform.localPosition);
-            spriteShapeController.spline.SetTangentMode(i + (segments.Length + 2), ShapeTangentMode.Continuous);
+
+            leftPoints.Add(segments[segments.Length - 1-i].leftPointA);
+            rightPoints.Add(segments[i].rightPointA);
 
         }
 
-    }
+        leftLine.startWidth = 1f;
+        leftLine.endWidth = 1f;
+        leftLine.positionCount = segments.Length;
 
-    private void CreateJaggedSpriteShape() {
+        leftLine.SetPositions(leftPoints.ToArray());
 
-        if (spriteShapeController == null) {
-            spriteShapeController = GetComponent<SpriteShapeController>();
-        }
+        rightLine.startWidth = 1f;
+        rightLine.endWidth = 1f;
+        rightLine.positionCount = segments.Length;
 
-        print("A");
-
-        int index = 0;
-        spriteShapeController.spline.Clear();
-        for (int i = 0; i < segments.Length; i++) {
-
-            if (i == 0) {
-                spriteShapeController.spline.InsertPointAt(index, segments[i].leftPointA - transform.localPosition);
-                index += 1;
-            }
-            else if (segments[i - 1].leftPointB != segments[i].leftPointA) {
-                spriteShapeController.spline.InsertPointAt(index, segments[i].leftPointA - transform.localPosition);
-                index += 1;
-            }
-            spriteShapeController.spline.InsertPointAt(index, segments[i].leftPointB - transform.localPosition);
-            index += 1;
-
-        }
-
-        print("B");
-
-        for (int i = segments.Length - 1; i >= 0; i--) {
-
-            if (i == segments.Length - 1) {
-                spriteShapeController.spline.InsertPointAt(index, segments[i].rightPointB - transform.localPosition);
-                index += 1;
-            }
-            else if (segments[i + 1].rightPointA != segments[i].rightPointB) {
-                spriteShapeController.spline.InsertPointAt(index, segments[i].rightPointB - transform.localPosition);
-                index += 1;
-            }
-            spriteShapeController.spline.InsertPointAt(index, segments[i].rightPointA - transform.localPosition);
-            index += 1;
-
-        }
-
-        print("C");
-
-        for (int i = 0; i < index; i++) {
-            spriteShapeController.spline.SetTangentMode(i, ShapeTangentMode.Continuous);
-        }
+        rightLine.SetPositions(rightPoints.ToArray());
 
     }
 

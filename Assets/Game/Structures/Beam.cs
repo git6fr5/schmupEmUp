@@ -8,30 +8,35 @@ public class Beam : MonoBehaviour {
     public Vector3 leftNode;
     public Vector3 rightNode;
 
-    public SpriteShapeController spriteShapeController;
+    public LineRenderer lineRenderer;
     public Material[] beamMaterials;
 
+    public float beamWidth;
+    public float parrallaxFactor;
+
     public void Init(int index) {
-        index = index % shapes.Length;
-        spriteShapeController.spriteShape = shapes[index];
-        leftNode.z = 0.01f;
-        rightNode.z = 0.01f;
+        index = index % beamMaterials.Length;
+        lineRenderer.materials = new Material[1] { beamMaterials[index] };
+        leftNode.z = GameRules.BeamDepth + 5f * index;
+        rightNode.z = GameRules.BeamDepth + 5f * index;
+        parrallaxFactor = (leftNode.z / GameRules.ParrallaxMax);
+
+        Draw();
+    }
+
+    void Update() {
         Draw();
     }
 
     void Draw() {
 
-        spriteShapeController.spline.Clear();
-        spriteShapeController.spline.InsertPointAt(0, leftNode - transform.localPosition);
-        spriteShapeController.spline.InsertPointAt(1, rightNode - transform.localPosition);
-        spriteShapeController.spline.SetTangentMode(0, ShapeTangentMode.Continuous);
-        spriteShapeController.spline.SetTangentMode(1, ShapeTangentMode.Continuous);
+        //rightNode += parrallaxFactor * GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
+        //leftNode += parrallaxFactor * GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
 
-        //for (int i = 0; i < ropeSegments.Length; i++) {
-        //    // spline.InsertPointAt(i, segments[i].leftPointA - transform.localPosition);
-        //    tailShape.spline.InsertPointAt(i, ropeSegments[i] - transform.localPosition);
-        //    tailShape.spline.SetTangentMode(i, ShapeTangentMode.Continuous);
-        //}
+        lineRenderer.startWidth = beamWidth;
+        lineRenderer.endWidth = beamWidth;
+        lineRenderer.positionCount = 2;
+        lineRenderer.SetPositions(new Vector3[] { rightNode, leftNode });
 
     }
 

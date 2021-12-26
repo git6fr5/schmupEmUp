@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class GameRules : MonoBehaviour {
 
+    public static float ParrallaxMax = 100f;
+    public static float TunnelDepth = 100f;
+    public static float BeamDepth = 70f;
+    public static float PlatformDepth = 50f;
+    public static float CliffDepth = 20f;
+
     public static string Path = "Assets/Resources/";
 
     public static float MovementPrecision = 0.001f;

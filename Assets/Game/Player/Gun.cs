@@ -60,8 +60,8 @@ public class Gun : MonoBehaviour {
         Vector3 direction = (orbital.transform.position - player.transform.position).normalized;
 
         if (Player.MouseAim) {
-            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            direction = ((Vector3)mousePos - transform.position).normalized;
+            // Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            // direction = ((Vector3)mousePos - transform.position).normalized;
             if (Input.GetMouseButtonDown(0)) {
                 Fire(direction);
             }
