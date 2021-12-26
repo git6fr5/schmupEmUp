@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using RandomParams = GameRules.RandomParams;
+
 public class Sequencer : MonoBehaviour {
 
     [System.Serializable]
@@ -34,12 +36,69 @@ public class Sequencer : MonoBehaviour {
         }
     }
 
+    [System.Serializable]
+    public class PlatformDistribution {
+
+        public Platform platformBase;
+
+        public RandomParams platformDistance;
+        public float turretLikelihood;
+        public float tankLikelihood;
+        public float mechaLikelihood;
+
+        int lastGeneratedIndex;
+        int nextDistance;
+
+        public void Check(Tunnel tunnel) {
+            if (tunnel.cameraIndex - lastGeneratedIndex > nextDistance) {
+                Generate(tunnel);
+                lastGeneratedIndex = tunnel.cameraIndex;
+            }
+            nextDistance = (int)platformDistance.GetRound();
+        }
+
+        // Check to turn off
+        private void Generate(Tunnel tunnel) {
+
+            // Get the index.
+            int increment = 30;
+            int index = (tunnel.cameraIndex - tunnel.startIndex) + increment;
+            if (index >= tunnel.segments.Length) {
+                index = tunnel.segments.Length - 1;
+            }
+
+            bool right = Random.Range(0f, 1f) > 0.5f;
+
+            Platform newPlatform = Instantiate(platformBase.gameObject).GetComponent<Platform>();
+            if (right) {
+                newPlatform.transform.position = tunnel.segments[index].rightPointA;
+            }
+            else {
+                newPlatform.transform.position = tunnel.segments[index].leftPointA;
+            }
+
+            newPlatform.shift = true;
+            newPlatform.shiftRight = right;
+
+            // The type of enemy.
+            newPlatform.spawnTurrets = Random.Range(0f, 1f) < turretLikelihood;
+            newPlatform.spawnTanks = Random.Range(0f, 1f) < tankLikelihood;
+
+            newPlatform.gameObject.SetActive(true);
+
+        }
+    }
+
     public SequenceComponent[] sequenceComponents;
+    public PlatformDistribution platformDistribution;
+    Tunnel tunnel;
+
     private Camera trackCam;
 
     // Start is called before the first frame update
     void Start() {
 
+        tunnel = (Tunnel)GameObject.FindObjectOfType(typeof(Tunnel));
         trackCam = Camera.main;
 
         for (int i = 0; i < sequenceComponents.Length; i++) {
@@ -63,6 +122,8 @@ public class Sequencer : MonoBehaviour {
                 sequenceComponents[i].CheckEnd();
             }
         }
+
+        platformDistribution.Check(tunnel);
 
     }
 

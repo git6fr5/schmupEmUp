@@ -8,6 +8,9 @@ using Type = GameRules.Type;
 [RequireComponent(typeof(CircleCollider2D))]
 public class Player : MonoBehaviour {
 
+    public static float SegmentLength = 0.25f;
+    public static int ConstraintDepth = 20;
+
     public static Vector3 ViewOffset;
     public static KeyCode InputKey = KeyCode.Space;
     public static bool MouseAim = false;
@@ -31,6 +34,12 @@ public class Player : MonoBehaviour {
     private Camera viewCam;
     public Vector2 viewOffset;
 
+    public float ropeLength;
+    public float weight;
+    private int segmentCount; // The number of segments.
+    public Vector3[] ropeSegments; // The current positions of the segments.
+    protected Vector3[] prevRopeSegments; // The previous positions of the segments.
+
     // Start is called before the first frame update
     void Start() {
 
@@ -41,17 +50,20 @@ public class Player : MonoBehaviour {
         viewCam = Camera.main;
         viewCam.transform.position = new Vector3(transform.position.x + viewOffset.x, transform.position.y + viewOffset.y, viewCam.transform.position.z);
         invincible = false;
+
+        RopeSegments();
     }
 
     // Update is called once per frame
     void Update() {
         Move();
         Scroll();
-        Color();
+        Shade();
     }
 
     void FixedUpdate() {
         Collision();
+        // RenderRope();
     }
 
     // Movement mechanic
@@ -89,7 +101,7 @@ public class Player : MonoBehaviour {
     }
 
     // Color
-    void Color() {
+    void Shade() {
         if (type == Type.RedPlayer) {
             spriteRenderer.material = GameRules.RedMaterial;
         }
@@ -185,4 +197,72 @@ public class Player : MonoBehaviour {
 
         yield return null;
     }
+
+    // Initalizes the rope segments.
+    void RopeSegments() {
+        // Get the number of segments for a rope of this length.
+        segmentCount = (int)Mathf.Ceil(ropeLength / SegmentLength);
+
+        // Initialize the rope segments.
+        ropeSegments = new Vector3[segmentCount];
+        prevRopeSegments = new Vector3[segmentCount];
+
+        for (int i = 0; i < segmentCount; i++) {
+            ropeSegments[i] = transform.position;
+            prevRopeSegments[i] = ropeSegments[i];
+        }
+        ropeSegments[segmentCount - 1] += ropeLength * Vector3.down;
+    }
+
+    // Renders the rope
+    void RenderRope() {
+        Simulation();
+        for (int i = 1; i < ropeSegments.Length; i++) {
+            Debug.DrawLine(ropeSegments[i-1], ropeSegments[i], Color.red, Time.fixedDeltaTime, false);
+        }
+
+    }
+
+    private float ticks;
+    public float frequency;
+    public float waveAmplitude;
+
+    void Simulation() {
+        ticks += Time.fixedDeltaTime;
+        Vector3 scrollForce = new Vector3(0f, -weight * GameRules.ScrollSpeed, 0f);
+        for (int i = 0; i < segmentCount; i++) {
+
+            float ratio = (float)i; // ((float)i) / ((float)segmentCount);
+            Vector3 waveFace = waveAmplitude * new Vector3(Mathf.Sin(2 * Mathf.PI * ticks * ratio * frequency), 0f, 0f); 
+
+            Vector3 velocity = ropeSegments[i] - prevRopeSegments[i];
+            prevRopeSegments[i] = ropeSegments[i];
+            ropeSegments[i] += velocity;
+            ropeSegments[i] += scrollForce * Time.fixedDeltaTime;
+            ropeSegments[i] += waveFace * Time.fixedDeltaTime;
+        }
+        for (int i = 0; i < ConstraintDepth; i++) {
+            Constraints();
+        }
+    }
+
+    void Constraints() {
+        ropeSegments[0] = transform.position;
+        for (int i = 1; i < segmentCount; i++) {
+            // Get the distance and direction between the segments.
+            float newDist = (ropeSegments[i - 1] - ropeSegments[i]).magnitude;
+            Vector3 direction = (ropeSegments[i - 1] - ropeSegments[i]).normalized;
+
+            // Get the error term.
+            float error = newDist - SegmentLength;
+            Vector3 errorVector = direction * error;
+
+            // Adjust the segments by the error term.
+            if (i != 1) {
+                ropeSegments[i - 1] -= errorVector * 0.5f;
+            }
+            ropeSegments[i] += errorVector * 0.5f;
+        }
+    }
+
 }

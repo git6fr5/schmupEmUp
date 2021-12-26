@@ -23,16 +23,16 @@ public class Platform : MonoBehaviour {
         [HideInInspector] public Vector3 rightPointB;
 
 
-        public void Randomize(RandomParams rWidth, RandomParams rLength, RandomParams rOffset, bool round) {
+        public void Randomize(Vector3 position, RandomParams rWidth, RandomParams rLength, RandomParams rOffset, bool round) {
             if (!round) {
                 width = rWidth.Get();
                 length = rLength.Get();
-                midPoint = rOffset.Get() * (Vector3)(Random.insideUnitCircle.normalized);
+                midPoint = position + rOffset.Get() * (Vector3)(Random.insideUnitCircle.normalized);
             }
             else {
                 width = rWidth.GetRound();
                 length = rLength.GetRound();
-                midPoint = rOffset.GetRound() * (Vector3)(Random.insideUnitCircle.normalized);
+                midPoint = position + rOffset.GetRound() * (Vector3)(Random.insideUnitCircle.normalized);
             }
         }
 
@@ -76,9 +76,12 @@ public class Platform : MonoBehaviour {
     public Vector3[] orderedPoints;
     public Vector3[] pathPoints;
 
+    public bool generate;
     public bool render;
     public bool debug;
     public bool detail;
+    public bool path;
+    public bool draw;
 
     void Update() {
 
@@ -97,8 +100,9 @@ public class Platform : MonoBehaviour {
 
         if (randomize) {
             for (int i = 0; i < segments.Length; i++) {
-                segments[i].Randomize(randomWidth, randomLength, randomOffset, round);
+                segments[i].Randomize(transform.position, randomWidth, randomLength, randomOffset, round);
             }
+            generate = true;
             randomize = false;
         }
 
@@ -106,26 +110,46 @@ public class Platform : MonoBehaviour {
             segments[i].Draw(debug, Color.yellow);
         }
 
-        if (render) {
-            // Render(0, segments.Length);
-            Render();
-            // render = false;
+        if (generate) {
+            Generate();
+            generate = false;
+            path = true;
         }
 
-        if (detail) {
-            AddDetail();
-            Draw();
-            detail = false;
-        }
+        if (orderedPoints != null && orderedPoints.Length > 0) {
 
-        if (orderedPoints != null) {
-
-            Path();
-            if (spawn) {
-                StartCoroutine(IESpawn());
-                spawn = false;
-            }
             Node();
+
+            if (path) {
+                Path();
+                path = false;
+            }
+
+            if (detail) {
+                Detail();
+                detail = false;
+            }
+
+            if (draw) {
+                Draw(); // Draws the spriteshape
+                draw = false;
+            }
+
+            if (pathPoints != null && pathPoints.Length > 0 && spawnTanks) {
+                StartCoroutine(IESpawn());
+                spawnTanks = false;
+            }
+
+            if (details != null && details.Count > 0 && spawnTurrets) {
+                SpawnTurrets();
+                spawnTurrets = false;
+            }
+
+            if (render) {
+                // Render(0, segments.Length);
+                Render();
+            }
+
         }
 
     }
@@ -133,7 +157,7 @@ public class Platform : MonoBehaviour {
     public Tank tank;
     public int tankCount;
     public float tankSpawnInterval;
-    public bool spawn;
+    public bool spawnTanks;
 
     private IEnumerator IESpawn() {
         for (int i = 0; i < tankCount; i++) {
@@ -143,13 +167,38 @@ public class Platform : MonoBehaviour {
         }
     }
 
+    public int maxTurrets;
+    public Turret turret;
+    public bool spawnTurrets;
+
+    private void SpawnTurrets() {
+
+        List<int> indices = new List<int>();
+
+        for (int i = 0; i < maxTurrets; i++) {
+
+            int index = Random.Range(0, details.Count);
+            if (!indices.Contains(index)) {
+                indices.Add(index);
+            }
+        }
+
+        for (int i = 0; i < indices.Count; i++) {
+
+            Instantiate(turret.gameObject);
+            turret.transform.position = transform.position + details[indices[i]].midPoint;
+            turret.gameObject.SetActive(true);
+        }
+
+    }
+
 
     public float thresholdDistance;
     private void Path() {
 
         pathPoints = new Vector3[orderedPoints.Length];
         for (int i = 0; i < orderedPoints.Length; i++) {
-            pathPoints[i] = orderedPoints[i] - (orderedPoints[i].normalized * 1f);
+            pathPoints[i] = orderedPoints[i] - ((orderedPoints[i] - transform.position).normalized * 1f);
         }
 
         //List<Vector3> cleanPath = new List<Vector3>();
@@ -165,16 +214,39 @@ public class Platform : MonoBehaviour {
         //}
         //pathPoints = cleanPath.ToArray();
 
-        for (int i = 1; i < pathPoints.Length; i++) {
-            Debug.DrawLine(pathPoints[i - 1], pathPoints[i], Color.green, Time.deltaTime, false);
-        }
-        Debug.DrawLine(pathPoints[orderedPoints.Length - 1], pathPoints[0], Color.green, Time.deltaTime, false);
-
+        
 
     }
 
     private void Render() {
 
+        for (int i = 1; i < orderedPoints.Length; i++) {
+            Debug.DrawLine(orderedPoints[i - 1], orderedPoints[i], Color.red, Time.deltaTime, false);
+        }
+        Debug.DrawLine(orderedPoints[orderedPoints.Length - 1], orderedPoints[0], Color.red, Time.deltaTime, false);
+
+        if (pathPoints.Length > 0) {
+            for (int i = 1; i < pathPoints.Length; i++) {
+                Debug.DrawLine(pathPoints[i - 1], pathPoints[i], Color.green, Time.deltaTime, false);
+            }
+            Debug.DrawLine(pathPoints[pathPoints.Length - 1], pathPoints[0], Color.green, Time.deltaTime, false);
+        }
+
+        // Generate the details points
+        if (details != null && details.Count > 0) {
+            for (int i = 0; i < details.Count; i++) {
+                details[i].Draw(true, Color.blue);
+            }
+            Debug.DrawLine(new Vector3(leftMost, topMost, 0f), new Vector3(leftMost, bottomMost, 0f), Color.blue, Time.deltaTime, false);
+            Debug.DrawLine(new Vector3(rightMost, topMost, 0f), new Vector3(rightMost, bottomMost, 0f), Color.blue, Time.deltaTime, false);
+            Debug.DrawLine(new Vector3(leftMost, topMost, 0f), new Vector3(rightMost, topMost, 0f), Color.blue, Time.deltaTime, false);
+            Debug.DrawLine(new Vector3(leftMost, bottomMost, 0f), new Vector3(rightMost, bottomMost, 0f), Color.blue, Time.deltaTime, false);
+
+        }
+
+    }
+
+    private void Generate() {
         // Collect all the points
         List<Vector3> allPoints = new List<Vector3>();
         for (int i = 0; i < segments.Length; i++) {
@@ -206,50 +278,12 @@ public class Platform : MonoBehaviour {
 
         orderedPoints = outerPoints.ToArray();
         Array.Sort<Vector3>(orderedPoints, new Comparison<Vector3>((vectorA, vectorB) => Compare(vectorA, vectorB)));
-
-        for (int i = 1; i < orderedPoints.Length; i++) {
-            Debug.DrawLine(orderedPoints[i - 1], orderedPoints[i], Color.red, Time.deltaTime, false);
-        }
-        Debug.DrawLine(orderedPoints[orderedPoints.Length-1], orderedPoints[0], Color.red, Time.deltaTime, false);
-
-        for (int i = 0; i < details.Count; i++) {
-
-
-            bool detailIsContained = true;
-            for (int j = 1; j < orderedPoints.Length; j++) {
-
-                Vector2 lineB = orderedPoints[j] -orderedPoints[j - 1];
-                bool a = CheckIntersect(details[i].leftPointA, details[i].leftPointB, orderedPoints[j], orderedPoints[j - 1]);
-                bool b = CheckIntersect(details[i].leftPointA, details[i].rightPointA, orderedPoints[j], orderedPoints[j - 1]);
-                bool c = CheckIntersect(details[i].leftPointB, details[i].rightPointB, orderedPoints[j], orderedPoints[j - 1]);
-                bool d = CheckIntersect(details[i].rightPointA, details[i].rightPointB, orderedPoints[j], orderedPoints[j - 1]);
-
-                if (a || b || c || d) {
-                    detailIsContained = false;
-                    break;
-                }
-            }
-
-            bool a0 = CheckIntersect(details[i].leftPointA, details[i].leftPointB, orderedPoints[orderedPoints.Length-1], orderedPoints[0]);
-            bool b0 = CheckIntersect(details[i].leftPointA, details[i].rightPointA, orderedPoints[orderedPoints.Length - 1], orderedPoints[0]);
-            bool c0 = CheckIntersect(details[i].leftPointB, details[i].rightPointB, orderedPoints[orderedPoints.Length - 1], orderedPoints[0]);
-            bool d0= CheckIntersect(details[i].rightPointA, details[i].rightPointB, orderedPoints[orderedPoints.Length - 1], orderedPoints[0]);
-
-            if (a0 || b0 || c0 || d0) {
-                detailIsContained = false;
-            }
-
-            if (detailIsContained) {
-                details[i].Draw(true, Color.blue);
-            }
-
-        }
-
-
     }
 
     SpriteShapeController spriteShapeController;
     public float[] distances;
+    public MeshFilter meshFilter;
+    public Color color;
     private void Draw() {
 
         if (spriteShapeController == null) {
@@ -277,12 +311,47 @@ public class Platform : MonoBehaviour {
             spriteShapeController.spline.SetTangentMode(i, ShapeTangentMode.Continuous);
         }
 
+        if (meshFilter.mesh == null) {
+            meshFilter.mesh = new Mesh();
+        }
+
+        List<Vector3> positions = new List<Vector3>();
+        for (int i = 0; i < cleanPath.Count; i++) {
+            positions.Add(cleanPath[i] - transform.localPosition);
+        }
+
+        positions.Add(Vector3.zero);
+
+        List<int> indices = new List<int>();
+        List<Color> colors = new List<Color>();
+
+        int index = 0;
+        for (int i = 1; i < cleanPath.Count; i++) {
+
+            indices.Add(positions.Count - 1);
+            indices.Add(i - 1);
+            indices.Add(i);
+
+        }
+
+        indices.Add(positions.Count - 1);
+        indices.Add(cleanPath.Count - 1);
+        indices.Add(0);
+
+        for (int i = 0; i < positions.Count; i++) {
+            colors.Add(color);
+        }
+
+        meshFilter.mesh.SetVertices(positions);
+        meshFilter.mesh.SetIndices(indices.ToArray(), MeshTopology.Triangles, 0);
+        meshFilter.mesh.colors = colors.ToArray();
+
     }
 
     public int Compare(Vector3 vA, Vector3 vB) {
 
-        float angleA = Vector2.SignedAngle((Vector2)vA, Vector2.right);
-        float angleB = Vector2.SignedAngle((Vector2)vB, Vector2.right);
+        float angleA = Vector2.SignedAngle((Vector2)vA - (Vector2)transform.position, Vector2.right);
+        float angleB = Vector2.SignedAngle((Vector2)vB - (Vector2)transform.position, Vector2.right);
 
         angleA = angleA < 0f ? angleA + 360f : angleA;
         angleB = angleB < 0f ? angleB + 360f : angleB;
@@ -298,7 +367,11 @@ public class Platform : MonoBehaviour {
     private float bottomMost;
     private float topMost;
 
-    private void AddDetail() {
+    private void Detail() {
+
+        //if (pathPoints == null || pathPoints.Length < 1) {
+        //    return;
+        //}
 
         details = new List<PlatformSegment>();
 
@@ -323,19 +396,16 @@ public class Platform : MonoBehaviour {
 
         }
 
-        Debug.DrawLine(new Vector3(leftMost, topMost, 0f), new Vector3(leftMost, bottomMost, 0f), Color.blue, Time.deltaTime, false);
-        Debug.DrawLine(new Vector3(rightMost, topMost, 0f), new Vector3(rightMost, bottomMost, 0f), Color.blue, Time.deltaTime, false);
-        Debug.DrawLine(new Vector3(leftMost, topMost, 0f), new Vector3(rightMost, topMost, 0f), Color.blue, Time.deltaTime, false);
-        Debug.DrawLine(new Vector3(leftMost, bottomMost, 0f), new Vector3(rightMost, bottomMost, 0f), Color.blue, Time.deltaTime, false);
-
         // Generate all the possible squares
-        for (int i = (int)Mathf.Floor(bottomMost); i < (int)Mathf.Ceil(topMost); i++) {
+        int scale = 2;
 
-            for (int j = (int)Mathf.Floor(leftMost); j < (int)Mathf.Ceil(rightMost); j++) {
+        for (int i = (int)Mathf.Ceil(bottomMost); i < (int)Mathf.Floor(topMost); i+= scale) {
 
+            for (int j = (int)Mathf.Ceil(leftMost); j < (int)Mathf.Floor(rightMost); j+= scale) {
+
+                float _scale = (float)scale;
                 float y = (float)i; float x = (float)j;
-
-                Vector3 center = new Vector3(x + 0.5f, y + 0.5f, 0f);
+                Vector3 center = new Vector3(x + _scale / 2f, y + _scale / 2f, 0f);
 
                 //Vector3 a = new Vector3(x, y, 0f);
                 //Vector3 b = new Vector3(x + 1f, y, 0f);
@@ -343,7 +413,7 @@ public class Platform : MonoBehaviour {
                 //Vector3 d = new Vector3(x + 1f, y + 1f, 0f);
 
                 PlatformSegment newSegment = new PlatformSegment();
-                newSegment.Set(center, 1f, 1f);
+                newSegment.Set(center, _scale, _scale);
                 details.Add(newSegment);
 
             }
@@ -355,6 +425,97 @@ public class Platform : MonoBehaviour {
             details[i].Draw(true, Color.blue);
         }
 
+        details = InteriorGrid(details);
+
+        // Generate the details points
+        for (int i = 0; i < details.Count; i++) {
+            details[i].Draw(true, Color.blue);
+        }
+
+    }
+
+    private List<PlatformSegment> InteriorGrid(List<PlatformSegment> details) {
+        List<PlatformSegment> temp = new List<PlatformSegment>();
+        for (int i = 0; i < details.Count; i++) {
+
+            Vector3 midPoint;
+            Vector3 direction;
+            Vector3 n1;
+            Vector3 n2;
+
+            bool detailIsContained = true;
+            for (int j = 1; j < orderedPoints.Length; j++) {
+                // print(details[i].leftPointA.ToString() + ", " + details[i].leftPointB.ToString() + ", " + orderedPoints[j].ToString() + ", " + orderedPoints[j - 1].ToString());
+                // return temp;
+                midPoint = (orderedPoints[j] + orderedPoints[j - 1]) / 2f;
+                direction = midPoint + (midPoint - transform.localPosition).normalized * 50f;
+
+                // against the normals
+                n1 = midPoint;
+                n2 = direction;
+
+                bool a = CheckIntersect(details[i].leftPointA, details[i].leftPointB, n1, n2);
+                bool b = CheckIntersect(details[i].leftPointA, details[i].rightPointA, n1, n2);
+                bool c = CheckIntersect(details[i].leftPointB, details[i].rightPointB, n1, n2);
+                bool d = CheckIntersect(details[i].rightPointA, details[i].rightPointB, n1, n2);
+                
+                if (a || b || c || d) {
+                    detailIsContained = false;
+                    break;
+                }
+
+                // against the tangents
+                n1 = orderedPoints[j];
+                n2 = orderedPoints[j - 1];
+
+                a = CheckIntersect(details[i].leftPointA, details[i].leftPointB, n1, n2);
+                b = CheckIntersect(details[i].leftPointA, details[i].rightPointA, n1, n2);
+                c = CheckIntersect(details[i].leftPointB, details[i].rightPointB, n1, n2);
+                d = CheckIntersect(details[i].rightPointA, details[i].rightPointB, n1, n2);
+
+                if (a || b || c || d) {
+                    detailIsContained = false;
+                    break;
+                }
+
+            }
+
+            midPoint = (orderedPoints[orderedPoints.Length - 1] + orderedPoints[0]) / 2f;
+            direction = midPoint + (midPoint - transform.localPosition).normalized * 50f;
+
+            n1 = midPoint;
+            n2 = direction;
+
+            bool a0 = CheckIntersect(details[i].leftPointA, details[i].leftPointB, n1, n2);
+            bool b0 = CheckIntersect(details[i].leftPointA, details[i].rightPointA, n1, n2);
+            bool c0 = CheckIntersect(details[i].leftPointB, details[i].rightPointB, n1, n2);
+            bool d0 = CheckIntersect(details[i].rightPointA, details[i].rightPointB, n1, n2);
+
+            if (a0 || b0 || c0 || d0) {
+                detailIsContained = false;
+            }
+
+            n1 = orderedPoints[orderedPoints.Length - 1];
+            n2 = orderedPoints[0];
+
+            a0 = CheckIntersect(details[i].leftPointA, details[i].leftPointB, n1, n2);
+            b0 = CheckIntersect(details[i].leftPointA, details[i].rightPointA, n1, n2);
+            c0 = CheckIntersect(details[i].leftPointB, details[i].rightPointB, n1, n2);
+            d0 = CheckIntersect(details[i].rightPointA, details[i].rightPointB, n1, n2);
+
+            if (a0 || b0 || c0 || d0) {
+                detailIsContained = false;
+            }
+
+
+            if (detailIsContained) {
+                temp.Add(details[i]);
+            }
+        }
+
+        print(details.Count.ToString() + ", " + temp.Count.ToString());
+        details = temp;
+        return temp;
     }
 
     public bool CheckIntersect(Vector2 A1, Vector2 A2, Vector2 B1, Vector2 B2) {
@@ -375,16 +536,19 @@ public class Platform : MonoBehaviour {
         );
 
         // check the intersection point is actually on both the lines
-        float precision = 0.001f;
+        float precision = 0.05f;
 
         bool A = (i - A1).magnitude + (i - A2).magnitude < (A1 - A2).magnitude + precision && (i - A1).magnitude + (i - A2).magnitude > (A1 - A2).magnitude - precision;
         bool B = (i - B1).magnitude + (i - B2).magnitude < (B1 - B2).magnitude + precision && (i - B1).magnitude + (i - B2).magnitude > (B1 - B2).magnitude - precision;
+        print(found.ToString() + ", " + A.ToString() + ", " + B.ToString());
         return (found && A && B);
     }
 
 
     public Vector3 rightNode;
     public Vector3 leftNode;
+    [HideInInspector] public bool shift;
+    [HideInInspector] public bool shiftRight;
 
     private void Node() {
 
@@ -393,6 +557,22 @@ public class Platform : MonoBehaviour {
 
         Debug.DrawLine(rightNode - Vector3.up * 10f, rightNode + Vector3.up * 10f, Color.yellow, Time.deltaTime, false);
         Debug.DrawLine(leftNode - Vector3.up * 10f, leftNode + Vector3.up * 10f, Color.yellow, Time.deltaTime, false);
+
+        Vector3 node;
+        if (shift) {
+            if (shiftRight) {
+                node = rightNode;
+            }
+            else {
+                node = leftNode;
+            }
+
+            for (int i = 0; i < orderedPoints.Length; i++) {
+
+                orderedPoints[i] += node;
+
+            }
+        }
 
     }
 

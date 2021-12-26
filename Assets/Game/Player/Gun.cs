@@ -8,6 +8,7 @@ using BulletType = GameRules.Type;
 public class Gun : MonoBehaviour {
 
     public Player player;
+    public Orbital orbital;
     public Bullet bullet;
     public float bulletSpeed;
 
@@ -15,63 +16,48 @@ public class Gun : MonoBehaviour {
 
     // Start is called before the first frame update
     void Start() {
+        x = ((float)count / MaxCount * 2 * Mathf.PI);
         spriteRenderer = GetComponent<SpriteRenderer>();
-        transform.parent = null;
     }
 
     // Update is called once per frame
     void Update() {
 
-        //
         Move();
         Fire();
         Color();
     }
-
-    //private Vector3 velocity = Vector3.zero;
-    //[Range(0f, 10f)] public float acceleration = 3f;
-    //[Range(0.95f, 1f)] public float damping = 0.95f;
-    //private float threshold = 0.001f;
 
     Vector3 displacement;
     Vector3 target;
     public float speed;
     public float orbitRadius = 1f;
 
+    float x;
+    public float period;
+
+    public static int MaxCount = 3;
+    public int count;
+
     private void Move() {
 
+        x += 2 * Mathf.PI * Time.deltaTime * period;
 
-        ////// Move towards the player
-        //Vector3 displacement = (player.transform.position - transform.position); // Clarity's sake.
-        //float sqrMagnitude = displacement.sqrMagnitude; // Clarity's sake.
-        //if (sqrMagnitude > orbitRadius * orbitRadius) {
-        //    velocity += displacement.normalized * acceleration * sqrMagnitude   * Time.deltaTime;
-        //}
+        float angle = Vector2.SignedAngle((Vector2)orbital.transform.localPosition, Vector2.up);
+        angle = angle < 0f ? 360 + angle : angle;
+        Vector3 newPosition = orbitRadius * new Vector3(Mathf.Cos(x), 0.5f * Mathf.Sin(x), 0f) + orbital.transform.position;
+        newPosition = (Quaternion.Euler(0f, 0f, angle) * (newPosition-orbital.transform.position)) + orbital.transform.position;
+        transform.position = newPosition;
 
-        //velocity *= damping;
-        //if (velocity.sqrMagnitude < threshold * threshold) {
-        //    // velocity = Vector3.zero;
-        //}
-
-        //transform.position += velocity * Time.deltaTime;
-
-        if (player.velocity != Vector2.zero) {
-            displacement = (Vector3)player.velocity.normalized * (orbitRadius + player.velocity.magnitude / 5f);
-        }
-        target = player.transform.position - displacement;
-
-        Vector3 velocity = (target - transform.position).normalized * speed;
-        transform.position += velocity * Time.deltaTime;
-
-        transform.position = player.transform.position + (transform.position - player.transform.position).normalized * orbitRadius;
-        transform.position += GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
+        float scale = (2f + Mathf.Sin(x)) / 0.5f + 0.5f;
+        transform.localScale = new Vector3(scale, scale, 0f);
 
     }
 
     private void Fire() {
 
         // Vector3 direction = Vector3.up;
-        Vector3 direction = (transform.position - player.transform.position).normalized;
+        Vector3 direction = (orbital.transform.position - player.transform.position).normalized;
 
         if (Player.MouseAim) {
             Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);

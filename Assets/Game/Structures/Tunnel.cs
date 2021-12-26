@@ -90,10 +90,71 @@ public class Tunnel : MonoBehaviour {
     public Color backgroundColor;
     private MeshFilter meshFilter;
 
+
+    private Vector3 initialLeftNode;
+    private Vector3 initialRightNode;
+
+
     void Start() {
+
+
+
+        initialLeftNode = transform.localPosition + Vector3.left * entranceWidth / 2f;
+        initialRightNode = transform.localPosition + Vector3.right * entranceWidth / 2f;
 
         //meshFilter = GetComponent<MeshFilter>();
         //meshFilter.mesh = new Mesh();
+
+        StartCoroutine(IEProcedural());
+    }
+
+    static float ProceduralUpdateRate = 0.2f;
+
+    public int cameraIndex;
+    public int startIndex = 0;
+    public int thresholdIndex = 25;
+
+    private IEnumerator IEProcedural() {
+
+        yield return new WaitForSeconds(ProceduralUpdateRate);
+
+        // Get the camera index
+        float cameraHeight = Camera.main.transform.position.y - (GameRules.ScreenPixelHeight / 2f / GameRules.PixelsPerUnit);
+        cameraHeight -= 2f;
+        for (int i = 0; i < segments.Length; i++) {
+            if (segments[i].rightPointA.y > cameraHeight) {
+                cameraIndex = i + startIndex;
+                break;
+            }
+        }
+
+        if (cameraIndex - startIndex > thresholdIndex) {
+            // do stuff
+
+            TunnelSegment[] temp = new TunnelSegment[segments.Length];
+            for (int i = thresholdIndex; i < segments.Length; i++) {
+                temp[i - thresholdIndex] = segments[i];
+            }
+
+            for (int i = segments.Length - thresholdIndex; i < segments.Length; i++) {
+
+                temp[i] = new TunnelSegment();
+                temp[i].Randomize(randomWidth, randomLength, randomOffset, randomAngle, round);
+
+            }
+
+            // transform.localPosition = Vector3.up * 2f * cameraIndex;
+            initialLeftNode = segments[thresholdIndex].leftPointA;
+            initialRightNode = segments[thresholdIndex].rightPointA;
+            startIndex = cameraIndex;
+            segments = temp;
+            render = true;
+        }
+
+
+
+        StartCoroutine(IEProcedural());
+        yield return null;
 
 
     }
@@ -121,7 +182,7 @@ public class Tunnel : MonoBehaviour {
         }
 
         if (segments.Length > 0) {
-            segments[0].Draw(transform.localPosition + Vector3.left * entranceWidth / 2f, transform.localPosition + Vector3.right * entranceWidth / 2f, continous);
+            segments[0].Draw(initialLeftNode, initialRightNode, continous);
         }
 
         for (int i = 1; i < segments.Length; i++) {
@@ -133,7 +194,7 @@ public class Tunnel : MonoBehaviour {
             // CreateJaggedSpriteShape();
             CreateContinousSpriteShape();
             render = false;
-        }        
+        }
 
         if (platforms) {
             CreatePlatforms();
@@ -142,26 +203,7 @@ public class Tunnel : MonoBehaviour {
     }
 
     void FixedUpdate() {
-        if (renderRange) {
-            // Get the ones next to the player.
-            // Assumes no angle
-            // Assumes length is fixed (not random range).
-            int segmentLength = (int)randomLength.GetRound();
-            List<TunnelSegment> segmentsWithinScreen = new List<TunnelSegment>();
-            float screenHeight = (float)(GameRules.ScreenPixelHeight / GameRules.PixelsPerUnit);
-            float cameraHeight = Camera.main.transform.position.y;
 
-            int startIndex = (int)(cameraHeight / segmentLength);
-            startIndex = Mathf.Max(0, startIndex - 3);
-            int finalIndex = Mathf.Min(segments.Length, startIndex + (int)Mathf.Ceil(screenHeight / segmentLength) + 3);
-            // print(startIndex);
-
-            float screenWidth = (float)(GameRules.ScreenPixelWidth / GameRules.PixelsPerUnit);
-            int subdivisions = segmentLength * GameRules.PixelsPerUnit / 8;
-
-            // Render(startIndex, startIndex + (int)Mathf.Ceil(screenHeight / segmentLength));
-            DebugLines(startIndex, finalIndex, subdivisions, (float)segmentLength, screenWidth / 2f);
-        }
     }
 
     void Render(int startIndex, int finalIndex) {
@@ -205,7 +247,7 @@ public class Tunnel : MonoBehaviour {
             for (int j = 0; j < subdivisions; j++) {
                 Vector3 leftPoint = segments[i].leftPointA + Vector3.up * length * ((float)j) / ((float)subdivisions);
                 Debug.DrawLine(leftPoint, leftPoint + Vector3.left * width, Color.red, Time.fixedDeltaTime, false);
-                RaycastHit2D leftRay = Physics2D.Linecast(leftPoint, leftPoint + Vector3.left * width); 
+                RaycastHit2D leftRay = Physics2D.Linecast(leftPoint, leftPoint + Vector3.left * width);
 
                 Vector3 rightPoint = segments[i].rightPointA + Vector3.up * length * ((float)j) / ((float)subdivisions);
                 Debug.DrawLine(rightPoint, rightPoint + Vector3.right * width, Color.red, Time.fixedDeltaTime, false);
@@ -237,7 +279,7 @@ public class Tunnel : MonoBehaviour {
 
         bool right = true;
 
-        for (int i = 10; i < segments.Length; i+=10) {
+        for (int i = 10; i < segments.Length; i += 10) {
 
             // Create a platform.
 
@@ -249,7 +291,8 @@ public class Tunnel : MonoBehaviour {
                 newPlatform.transform.position = segments[i].leftPointA;
             }
 
-
+            newPlatform.shift = true;
+            newPlatform.shiftRight = right;
             newPlatform.gameObject.SetActive(true);
             right = !right;
 
@@ -270,8 +313,8 @@ public class Tunnel : MonoBehaviour {
             spriteShapeController.spline.SetTangentMode(i, ShapeTangentMode.Continuous);
         }
 
-        spriteShapeController.spline.InsertPointAt(segments.Length, segments[segments.Length-1].leftPointB - transform.localPosition);
-        spriteShapeController.spline.InsertPointAt(segments.Length + 1, segments[segments.Length-1].rightPointB - transform.localPosition);
+        spriteShapeController.spline.InsertPointAt(segments.Length, segments[segments.Length - 1].leftPointB - transform.localPosition);
+        spriteShapeController.spline.InsertPointAt(segments.Length + 1, segments[segments.Length - 1].rightPointB - transform.localPosition);
 
         spriteShapeController.spline.SetTangentMode(segments.Length, ShapeTangentMode.Continuous);
         spriteShapeController.spline.SetTangentMode(segments.Length + 1, ShapeTangentMode.Continuous);
@@ -279,7 +322,7 @@ public class Tunnel : MonoBehaviour {
 
         for (int i = 0; i < segments.Length; i++) {
             // spline.InsertPointAt(i + segments.Length, segments[segments.Length - (i + 1)].rightPointA - transform.localPosition);
-            spriteShapeController.spline.InsertPointAt(i + (segments.Length + 2), segments[segments.Length - (i+1)].rightPointA - transform.localPosition);
+            spriteShapeController.spline.InsertPointAt(i + (segments.Length + 2), segments[segments.Length - (i + 1)].rightPointA - transform.localPosition);
             spriteShapeController.spline.SetTangentMode(i + (segments.Length + 2), ShapeTangentMode.Continuous);
 
         }
@@ -313,9 +356,9 @@ public class Tunnel : MonoBehaviour {
 
         print("B");
 
-        for (int i = segments.Length-1; i >= 0; i--) {
+        for (int i = segments.Length - 1; i >= 0; i--) {
 
-            if (i == segments.Length-1) {
+            if (i == segments.Length - 1) {
                 spriteShapeController.spline.InsertPointAt(index, segments[i].rightPointB - transform.localPosition);
                 index += 1;
             }
