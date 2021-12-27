@@ -167,7 +167,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27f141e146e1de5498d06b1126d10de7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movementName: movementA
+  movementName: gear_bounce_0
   save: 0
   load: 1
   reset: 0
@@ -175,6 +175,7 @@ MonoBehaviour:
   duration: 0.05
   ticks: 0
   reverse: 0
+  flip: 0
   horizontalSpeed: 0
   verticalSpeed: 0
   circle: 0

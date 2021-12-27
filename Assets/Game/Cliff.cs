@@ -58,11 +58,11 @@ public class Cliff : MonoBehaviour {
             Vector3 point = Vector3.zero;
             Vector3 shadowPoint = Vector3.zero;
             if (right) {
-                point = tunnel.segments[i].rightPointA + Vector3.left * 0.25f + Vector3.down * 1f;
+                point = tunnel.segments[i].rightPointA + Vector3.down * 1f;
                 shadowPoint = point + Vector3.left * 1.5f;
             }
             else {
-                point = tunnel.segments[tunnel.segments.Length - 1 - i].leftPointA + Vector3.right * 0.25f + Vector3.down * 1f;
+                point = tunnel.segments[tunnel.segments.Length - 1 - i].leftPointA + Vector3.down * 1f;
                 shadowPoint = point + Vector3.right * 1.5f;
             }
 
@@ -74,8 +74,8 @@ public class Cliff : MonoBehaviour {
 
         }
 
-        cliffSide.startWidth = 2f;
-        cliffSide.endWidth = 2f;
+        cliffSide.startWidth = 1f;
+        cliffSide.endWidth = 1f;
         cliffSide.positionCount = tunnel.segments.Length;
         cliffSide.SetPositions(side.ToArray());
 

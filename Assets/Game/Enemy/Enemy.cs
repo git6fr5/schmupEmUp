@@ -18,6 +18,8 @@ public class Enemy : MonoBehaviour {
     SpriteRenderer spriteRenderer;
     CircleCollider2D hitbox;
 
+    public bool neverDeleteMe;
+
     public string enemyName;
     public bool save;
     public bool load;
@@ -234,7 +236,9 @@ public class Enemy : MonoBehaviour {
     void Update() {
 
         if ((transform.position - GameRules.MainCamera.transform.position).magnitude > 50f) {
-            Destroy(gameObject);
+            if (!neverDeleteMe) {
+                Destroy(gameObject);
+            }
         }
 
         bulletIndex = (int)_bulletIndex;
@@ -353,7 +357,9 @@ public class Enemy : MonoBehaviour {
                 int enemyType = (int)type;
                 // There's a smarter way to do this I'm sure.
                 if (bulletType == enemyType) {
-                    Destroy(gameObject);
+                    if (!neverDeleteMe) {
+                        Destroy(gameObject);
+                    }
                 }
             }
         }
