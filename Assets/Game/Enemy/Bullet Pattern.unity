@@ -157,7 +157,7 @@ MonoBehaviour:
   debugLineDuration: 0.5
   debugLines: 0
   debugBullets: 1
-  patternName: patternA
+  patternName: pulse2
   patternInterval: 1
   save: 0
   load: 1
@@ -172,8 +172,15 @@ MonoBehaviour:
   bulletInitAngle: 1
   bulletSpread: 1
   bulletSpeed: 5
+  bulletSpeedIncrement: 0
   bulletAccelerationAngle: 0
   bulletAccelerationMagnitude: 0
+  absoluteAcceleration: 0
+  isInitialized: 0
+  isFiring: 0
+  fireCounts: 0
+  isFinished: 0
+  loop: 1
 --- !u!212 &92244069
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -336,6 +343,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b760e955583516f479f58231b9eac506, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  snake: 0
   scrollSpeed: 0
   maxScrollSpeed: 10
   scrollAcceleration: 0
@@ -348,6 +356,8 @@ MonoBehaviour:
   rotationChangeInterval:
     min: 0
     max: 0
+  blue: {r: 0, g: 0, b: 0, a: 0}
+  red: {r: 0, g: 0, b: 0, a: 0}
 --- !u!1 &2039841591
 GameObject:
   m_ObjectHideFlags: 0
@@ -379,6 +389,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 362f7d09c8172ab4493ec3fbf3d3e9a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sprites:
+  - {fileID: 8618663976898325987, guid: 2713792ed5551a44c93ef348dfc73c2d, type: 3}
+  index: 0
   type: 0
   velocity: {x: 0, y: 0}
   acceleration: {x: 0, y: 0}

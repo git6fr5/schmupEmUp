@@ -9,6 +9,8 @@ using Type = GameRules.Type;
 [RequireComponent(typeof(CircleCollider2D))]
 public class Player : MonoBehaviour {
 
+    public int score;
+
     public static float SegmentLength = 0.25f;
     public static int ConstraintDepth = 20;
 
@@ -22,11 +24,13 @@ public class Player : MonoBehaviour {
 
     public Type type;
 
-    public int maxLives = 5;
+    public int maxLives = 9;
     public int lives = 3;
     public bool invincible;
     public float explosionDuration;
     public float invincibilityDuration;
+
+    public Orbital livesOrbital;
 
     public float maxSpeed;
     public float acceleration;
@@ -64,6 +68,7 @@ public class Player : MonoBehaviour {
         Scroll();
         Shade();
         Highlight();
+        Orbs();
     }
 
     void FixedUpdate() {
@@ -71,12 +76,24 @@ public class Player : MonoBehaviour {
         RenderRope();
     }
 
+    private void Orbs() {
+
+        if (lives > livesOrbital.lives.Length) {
+            lives = livesOrbital.lives.Length;
+        }
+
+        for (int i = 0; i < livesOrbital.lives.Length; i++) {
+            livesOrbital.lives[i].gameObject.SetActive(i < lives);
+        }
+
+    }
+
     // Movement mechanic
     void Move() {
 
         if (knockback) {
             transform.position += (Vector3)velocity * Time.deltaTime;
-            return; 
+            return;
         }
 
         // Damping
@@ -134,12 +151,14 @@ public class Player : MonoBehaviour {
                 int playerType = (int)type - GameRules.ColorPaletteSize;
                 // There's a smarter way to do this I'm sure.
                 if (bulletType < GameRules.ColorPaletteSize) {
-                    if (bulletType == playerType) {
+
+                    if (bulletType != playerType) {
                         Respawn();
                     }
-                    else if (bulletType != playerType) {
-                        ChangeColor(bulletType);
+                    else if (bulletType == playerType) {
+                        // lives += 1;
                     }
+
                     Destroy(bullet.gameObject);
 
                 }
@@ -153,8 +172,33 @@ public class Player : MonoBehaviour {
                     StartCoroutine(IEKnockback());
                 }
             }
+
+            Change change = collisions[i].GetComponent<Change>();
+            if (change != null) {
+
+                int changeType = (int)change.type;
+                int playerType = (int)type;
+
+                if (changeType != playerType) {
+                    type = (Type)(changeType);
+                    lives += 1;
+                    change.Eat();
+                }
+                else {
+                    if (GameRules.AlternatingOrbs) {
+                        Respawn();
+                        lives -= 1;
+                        Destroy(change.gameObject);
+                    }
+                    else {
+                        lives += 1;
+                        change.Eat();
+
+                    }
+                }
+            }
+
         }
-            
     }
 
     private IEnumerator IEKnockback() {
@@ -171,10 +215,11 @@ public class Player : MonoBehaviour {
 
     public void Respawn(bool hitWall = false) {
         if (!invincible) {
+            GameRules.PlayAnimation(transform.position, GameRules.ExplosionAnim);
             invincible = true;
             lives -= 1;
             if (lives <= 0) {
-                StartCoroutine(IEReset(explosionDuration * 2f));
+                StartCoroutine(IEReset(explosionDuration * 5f));
             }
             else {
                 StartCoroutine(IEInvicibility(explosionDuration, invincibilityDuration, 0.1f, hitWall));
@@ -188,7 +233,10 @@ public class Player : MonoBehaviour {
         invincible = true;
         Time.timeScale = 0.5f;
         ShakeUI.StartShake(1f, explosionDelay * Time.timeScale);
-        yield return new WaitForSeconds(explosionDelay * Time.timeScale);
+        for (int i = 0; i < 50; i++) {
+            GameRules.PlayAnimation(transform.position + (Vector3)Random.insideUnitCircle * 15f, GameRules.ExplosionAnim);
+            yield return new WaitForSeconds(explosionDelay * Time.timeScale / 50f);
+        }
 
         Time.timeScale = 1f;
         RestartUI.Restart();
@@ -214,7 +262,7 @@ public class Player : MonoBehaviour {
             transform.position -= transform.position.z * Vector3.forward;
         }
 
-        for (int i = 0; i < (int)(invincibilityDelay/ flickerDelay); i++) {
+        for (int i = 0; i < (int)(invincibilityDelay / flickerDelay); i++) {
             spriteRenderer.enabled = !spriteRenderer.enabled;
             yield return new WaitForSeconds(flickerDelay);
         }
@@ -245,7 +293,7 @@ public class Player : MonoBehaviour {
     void RenderRope() {
         SimulationB();
         for (int i = 1; i < ropeSegments.Length; i++) {
-            Debug.DrawLine(ropeSegments[i-1], ropeSegments[i], Color.red, Time.fixedDeltaTime, false);
+            Debug.DrawLine(ropeSegments[i - 1], ropeSegments[i], Color.red, Time.fixedDeltaTime, false);
         }
 
     }
@@ -260,7 +308,7 @@ public class Player : MonoBehaviour {
         for (int i = 0; i < segmentCount; i++) {
 
             float ratio = (float)i; // ((float)i) / ((float)segmentCount);
-            Vector3 waveFace = waveAmplitude * new Vector3(Mathf.Sin(2 * Mathf.PI * ticks * ratio * frequency), 0f, 0f); 
+            Vector3 waveFace = waveAmplitude * new Vector3(Mathf.Sin(2 * Mathf.PI * ticks * ratio * frequency), 0f, 0f);
 
             Vector3 velocity = ropeSegments[i] - prevRopeSegments[i];
             prevRopeSegments[i] = ropeSegments[i];
@@ -309,6 +357,13 @@ public class Player : MonoBehaviour {
         tailRenderer.endWidth = tailEndWidth;
         tailRenderer.positionCount = ropeSegments.Length;
         tailRenderer.SetPositions(ropeSegments);
+
+        if (type == Type.BluePlayer) {
+            tailRenderer.materials[0].SetColor("_Color", GameRules.Blue);
+        }
+        else {
+            tailRenderer.materials[0].SetColor("_Color", GameRules.Red);
+        }
 
     }
 

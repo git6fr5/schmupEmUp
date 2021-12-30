@@ -51,7 +51,7 @@ public class Enemy : MonoBehaviour {
 
     [HideInInspector] public bool flip;
 
-    [Range(0, 8)] public int assetIndex;
+    [Range(0, 9)] public int assetIndex;
 
     public EnemyAssets.BulletType _bulletIndex;
     private int bulletIndex;
@@ -59,6 +59,8 @@ public class Enemy : MonoBehaviour {
 
     private Sprite regularSprite;
     private Sprite highlightSprite;
+
+    public Transform[] engineNodes;
 
     [System.Serializable]
     public class EnemyData {
@@ -189,7 +191,21 @@ public class Enemy : MonoBehaviour {
         Color(); // Shouldn't need to do this in update.
 
         spriteRenderer.sprite = regularSprite;
+        hasBeenOnScreen = false;
 
+        foreach (Transform child in transform) {
+            Destroy(child.gameObject);
+        }
+        engineNodes = new Transform[EnemyAssets.Assets[assetIndex].engineNodes.Length];
+        for (int i = 0; i < EnemyAssets.Assets[assetIndex].engineNodes.Length; i++) {
+            Transform newNode = Instantiate(EnemyAssets.Assets[assetIndex].engineNodes[i].gameObject).GetComponent<Transform>();
+            newNode.parent = transform;
+            newNode.localPosition = EnemyAssets.Assets[assetIndex].engineNodes[i].localPosition;
+            engineNodes[i] = newNode;
+        }
+        //for (int i = 0; i < engineNodes.Length; i++) {
+        //    GameRules.PlayAnimation(transform.position, EnemyAssets.EngineAnimation, true, engineNodes[i], true);
+        //}
         // gameObject.SetActive(true);
     }
 
@@ -232,18 +248,31 @@ public class Enemy : MonoBehaviour {
         isInitialized = true;
     }
 
+    public bool hasBeenOnScreen = false;
+
     // Update is called once per frame
     void Update() {
 
-        if ((transform.position - GameRules.MainCamera.transform.position).magnitude > 50f) {
+        if (GameRules.OnScreen(transform.position) && !hasBeenOnScreen) {
+            hasBeenOnScreen = true;
+        }
+
+        //if (transform.position.y - GameRules.MainCamera.transform.position).magnitude > 50f) {
+        //    if (!neverDeleteMe) {
+        //        Destroy(gameObject);
+        //    }
+        //}
+
+        if (!GameRules.OnScreen(transform.position) && hasBeenOnScreen) {
             if (!neverDeleteMe) {
                 Destroy(gameObject);
             }
         }
 
-        bulletIndex = (int)_bulletIndex;
+        // 
 
         if (save) {
+            bulletIndex = (int)_bulletIndex;
             EnemyData.Save(this);
             save = false;
         }
@@ -275,6 +304,8 @@ public class Enemy : MonoBehaviour {
         if (!isInitialized) {
             return;
         }
+
+        RenderTrail();
 
         if (pattern.isFinished) {
             currPattern = (currPattern + 1) % bulletPatternData.Length;
@@ -364,6 +395,94 @@ public class Enemy : MonoBehaviour {
             }
         }
 
+    }
+
+    void RenderTrail() {
+
+        SimulationB();
+
+    }
+
+    public static float SegmentLength = 0.25f;
+    public static int ConstraintDepth = 10;
+
+    public static float TrailStartWidth = 2f/16f;
+    public static float TrailEndWidth = 0f;
+
+    public static float RopeLength = 5f;
+    public float weight;
+    private Vector3[][] ropeSegments; // The current positions of the segments.
+    // protected Vector3[][] prevRopeSegments; // The previous positions of the segments.
+
+    private bool initTrail;
+
+    void SimulationB() {
+
+        if (ropeSegments == null || ropeSegments.Length != engineNodes.Length) {
+            ropeSegments = new Vector3[engineNodes.Length][];
+            for (int n = 0; n < ropeSegments.Length; n++) {
+                ropeSegments[n] = new Vector3[(int)(RopeLength / SegmentLength)];
+            }
+        }
+
+        for (int n = 0; n < engineNodes.Length; n++) {
+
+            ropeSegments[n][0] = engineNodes[n].position;
+            for (int i = 1; i < ropeSegments[n].Length; i++) {
+                ropeSegments[n][i] += GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
+                // ropeSegments[i] += (Vector3)velocity / 20f * Time.deltaTime;
+                if ((ropeSegments[n][i - 1] - ropeSegments[n][i]).magnitude > SegmentLength) {
+                    ropeSegments[n][i] += (ropeSegments[n][i - 1] - ropeSegments[n][i]).normalized * Time.deltaTime * 5f;
+                }
+            }
+
+            for (int i = 0; i < ConstraintDepth; i++) {
+                Constraints(engineNodes[n].position, ropeSegments[n]);
+            }
+
+            LineRenderer trailRenderer = engineNodes[n].GetComponent<LineRenderer>();
+            if (trailRenderer == null) {
+                engineNodes[n].gameObject.AddComponent<LineRenderer>();
+                trailRenderer = engineNodes[n].GetComponent<LineRenderer>();
+                trailRenderer.materials = new Material[] { EnemyAssets.EnemyTrail };
+            }
+
+            trailRenderer.startWidth = TrailStartWidth;
+            trailRenderer.endWidth = TrailEndWidth;
+            trailRenderer.positionCount = ropeSegments[n].Length;
+            trailRenderer.SetPositions(ropeSegments[n]);
+
+            if (type == Type.BlueEnemy) {
+                Color col = GameRules.Blue;
+                col.a = 0.25f;
+                trailRenderer.materials[0].SetColor("_Color", GameRules.Blue);
+            }
+            else {
+                Color col = GameRules.Red;
+                col.a = 0.25f;
+                trailRenderer.materials[0].SetColor("_Color", GameRules.Red);
+            }
+        }
+    }
+
+    void Constraints(Vector3 origin, Vector3[] positions) {
+        positions[0] = origin;
+        for (int i = 1; i < positions.Length; i++) {
+            // Get the distance and direction between the segments.
+            float newDist = (positions[i - 1] - positions[i]).magnitude;
+            Vector3 direction = (positions[i - 1] - positions[i]).normalized;
+
+            // Get the error term.
+            float error = newDist - SegmentLength;
+            Vector3 errorVector = direction * error;
+
+            // Adjust the segments by the error term.
+            if (i != 1) {
+                positions[i - 1] -= errorVector * 0.5f;
+            }
+            positions[i] += errorVector * 0.5f;
+        }
+        positions[0] = origin;
     }
 
 }

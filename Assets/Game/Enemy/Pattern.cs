@@ -39,8 +39,10 @@ public class Pattern : MonoBehaviour {
     public float bulletSpread; // The total amount of spread that the bullets cover
 
     public float bulletSpeed;
+    public float bulletSpeedIncrement;
     public float bulletAccelerationAngle; // Relative to the direction that the bullet is travelling in.
     public float bulletAccelerationMagnitude;
+    public bool absoluteAcceleration;
 
     [System.Serializable]
     public class PatternData {
@@ -61,8 +63,10 @@ public class Pattern : MonoBehaviour {
         public float bulletInitAngle;
         public float bulletSpread;
         public float bulletSpeed;
+        public float bulletSpeedIncrement;
         public float bulletAccelerationAngle;
         public float bulletAccelerationMagnitude;
+        public bool absoluteAcceleration;
 
         public PatternData(Pattern pattern) {
             this.patternName = pattern.patternName;
@@ -78,8 +82,10 @@ public class Pattern : MonoBehaviour {
             this.bulletInitAngle = pattern.bulletInitAngle;
             this.bulletSpread = pattern.bulletSpread;
             this.bulletSpeed = pattern.bulletSpeed;
+            this.bulletSpeedIncrement = pattern.bulletSpeedIncrement;
             this.bulletAccelerationAngle = pattern.bulletAccelerationAngle;
             this.bulletAccelerationMagnitude = pattern.bulletAccelerationMagnitude;
+            this.absoluteAcceleration = pattern.absoluteAcceleration;
         }
 
         public static Pattern Read(Pattern pattern, PatternData data) {
@@ -96,6 +102,9 @@ public class Pattern : MonoBehaviour {
             pattern.bulletInitAngle = data.bulletInitAngle;
             pattern.bulletSpread = data.bulletSpread;
             pattern.bulletSpeed = data.bulletSpeed;
+            pattern.bulletSpeedIncrement = data.bulletSpeedIncrement;
+
+            pattern.absoluteAcceleration = data.absoluteAcceleration;
             pattern.bulletAccelerationAngle = data.bulletAccelerationAngle;
             pattern.bulletAccelerationMagnitude = data.bulletAccelerationMagnitude;
             pattern.init = true;
@@ -198,6 +207,10 @@ public class Pattern : MonoBehaviour {
 
     private IEnumerator IEPattern() {
 
+        while (!GameRules.OnScreen(transform.position)) {
+            yield return new WaitForSeconds(0.05f);
+        }
+
         for (int shotNumber = 0; shotNumber < shotCount; shotNumber++) {
             // Fire shot.
 
@@ -227,14 +240,20 @@ public class Pattern : MonoBehaviour {
                 if (aimContinous) {
                     direction = AimAtPlayer();
                 }
-                
-                Vector3 bulletVelocity = bulletSpeed * direction;
+
+                float _bulletSpeed = bulletSpeed + bulletSpeedIncrement * shotNumber;
+                Vector3 bulletVelocity = _bulletSpeed * direction;
                 Vector2 bulletAcceleration = bulletAccelerationMagnitude * (Quaternion.Euler(0f, 0f, bulletAccelerationAngle) * bulletVelocity.normalized);
+                if (absoluteAcceleration) {
+                    // overriding
+                    bulletAcceleration = bulletAccelerationMagnitude * (Quaternion.Euler(0f, 0f, bulletAccelerationAngle) * Vector2.right);
+                }
 
                 if (debugLines) {
                     Debug.DrawLine(transform.position, transform.position + bulletVelocity, Color.yellow, debugLineDuration, false);
                 }
                 if (debugBullets) {
+                    
                     Enemy enemy = GetComponent<Enemy>();
                     BulletType type = enemy != null ? enemy.type : BulletType.RedEnemy;
                     Bullet newBullet = Instantiate(bulletBase.gameObject).GetComponent<Bullet>();
@@ -267,6 +286,16 @@ public class Pattern : MonoBehaviour {
     public bool isFiring;
     public int fireCounts;
     private IEnumerator IEFireEffect() {
+
+        Enemy enemy = GetComponent<Enemy>();
+        if (enemy != null) {
+            if (enemy.type == GameRules.Type.RedEnemy) {
+                GameRules.PlayAnimation(transform.position, GameRules.RedFireAnimation, true, transform);
+            }
+            else {
+                GameRules.PlayAnimation(transform.position, GameRules.BlueFireAnimation, true, transform);
+            }
+        }
 
         if (!isFiring) {
             isFiring = true;

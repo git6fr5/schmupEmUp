@@ -155,7 +155,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8782002d6d7559649bfa8ed96d821841, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyName: ship1
+  neverDeleteMe: 1
+  enemyName: ___
   save: 0
   load: 1
   reset: 1
@@ -163,9 +164,11 @@ MonoBehaviour:
   isInitialized: 0
   type: 1
   bullet: {fileID: 0}
-  bulletPatternFiles: []
+  bulletPatternFiles:
+  - empty_1
   bulletPatternData: []
-  movementFiles: []
+  movementFiles:
+  - empty
   movementData: []
   isFlying: 1
   currPattern: 0
@@ -177,6 +180,8 @@ MonoBehaviour:
   assetIndex: 0
   _bulletIndex: 0
   bulletSize: 0
+  engineNodes: []
+  hasBeenOnScreen: 0
 --- !u!4 &1553955957
 Transform:
   m_ObjectHideFlags: 0
@@ -222,8 +227,10 @@ MonoBehaviour:
   bulletInitAngle: 0
   bulletSpread: 0
   bulletSpeed: 0
+  bulletSpeedIncrement: 0
   bulletAccelerationAngle: 0
   bulletAccelerationMagnitude: 0
+  absoluteAcceleration: 0
   isInitialized: 0
   isFiring: 0
   fireCounts: 0
@@ -366,7 +373,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 10
+  orthographic size: 25
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -408,6 +415,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b760e955583516f479f58231b9eac506, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  snake: 0
+  alternatingOrbs: 0
   scrollSpeed: 0
   maxScrollSpeed: 10
   scrollAcceleration: 0
@@ -420,6 +429,12 @@ MonoBehaviour:
   rotationChangeInterval:
     min: 0
     max: 0
+  blue: {r: 0, g: 0, b: 0, a: 0}
+  red: {r: 0, g: 0, b: 0, a: 0}
+  explosionAnim: []
+  eatAnim: []
+  redFireAnimation: []
+  blueFireAnimation: []
 --- !u!1001 &6432115150684636795
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -427,6 +442,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 147595365065988051, guid: 74bfcb91f8a483c49916b07fbef21068, type: 3}
+      propertyPath: m_Name
+      value: ship_2_3_6_7_8_Nodes
+      objectReference: {fileID: 0}
     - target: {fileID: 6432115151632601332, guid: 74bfcb91f8a483c49916b07fbef21068, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

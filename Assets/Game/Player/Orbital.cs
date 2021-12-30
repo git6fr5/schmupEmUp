@@ -11,13 +11,40 @@ public class Orbital : MonoBehaviour {
     public float speed;
     public float orbitRadius = 1f;
 
+    // public int count;
+
     void Update() {
         if (Player.MouseAimOrb) {
-            Aim();
+            // Aim();
         }
         else {
-            Move();
+            // Move();
         }
+
+        if (GameRules.Snake) {
+            // gameObject.SetActive(false);
+        }
+
+        Attach();
+
+    }
+
+    public Vector3 orbitA;
+    public Vector3 orbitB;
+
+    public Gun[] lives;
+
+    private void Attach() {
+
+        transform.position = player.ropeSegments[1];
+        // transform.eulerAngles = Vector3.forward * Vector2.SignedAngle(Vector2.down, ((Vector2)(player.ropeSegments[0] - player.ropeSegments[1])).normalized);
+
+        int index = (int)Mathf.Floor(player.ropeSegments.Length / 3);
+        orbitA = player.ropeSegments[index];
+        
+        index = (int)Mathf.Floor(2f * (float)player.ropeSegments.Length / 3f);
+        orbitB = player.ropeSegments[index];
+
     }
 
     private void Aim() {

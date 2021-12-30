@@ -9,8 +9,12 @@ public class EnemyAssets : MonoBehaviour {
 
         public Sprite regularSprite;
         public Sprite highlightSprite;
+        public Transform[] engineNodes;
 
     }
+
+    public Material enemyTrail;
+    public static Material EnemyTrail;
 
     public AssetData[] assets;
     public static AssetData[] Assets;
@@ -18,9 +22,14 @@ public class EnemyAssets : MonoBehaviour {
     public Bullet[] bullets;
     public static Bullet[] Bullets;
 
+    public Sprite[] engineAnimation;
+    public static Sprite[] EngineAnimation;
+
     void Start() {
+        EnemyTrail = enemyTrail;
         Assets = assets;
         Bullets = bullets;
+        EngineAnimation = engineAnimation;
     }
 
     public enum BulletType {

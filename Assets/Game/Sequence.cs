@@ -6,17 +6,27 @@ public class Sequence : MonoBehaviour {
 
     public Sequencer[] sequence;
     public bool currSequenceIsNotTimed = false;
-    public int index = 0;
+    public int index = -1;
+
+    public int round;
 
     void Start() {
-
         NextSequence();
-
     }
 
     private void NextSequence() {
-        sequence[index].Reset();
+
+        index += 1;
+        if (index >= sequence.Length) {
+            index = 0;
+            round += 1;
+        }
+
+        sequence[index].Reset(round);
         sequence[index].gameObject.SetActive(true);
+        sequence[index].isStarted = false;
+        sequence[index].isFinished = false;
+
         if (sequence[index].isTimed) {
             StartCoroutine(IEDeactivateSequence(sequence[index].duration));
             currSequenceIsNotTimed = false;
@@ -24,8 +34,7 @@ public class Sequence : MonoBehaviour {
         else {
             currSequenceIsNotTimed = true;
         }
-        index += 1;
-        index = index % sequence.Length;
+        
     }
 
     void Update() {
@@ -33,6 +42,7 @@ public class Sequence : MonoBehaviour {
         if (currSequenceIsNotTimed) {
 
             if (sequence[index].isFinished) {
+                sequence[index].isStarted = false;
                 sequence[index].gameObject.SetActive(false);
                 NextSequence();
             }

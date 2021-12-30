@@ -225,6 +225,7 @@ public class Wave : MonoBehaviour {
             }
             spawnRoutine = StartCoroutine(IESpawn());
 
+            isCompleted = false;
             isCleared = false;
             reset = false;
             return;

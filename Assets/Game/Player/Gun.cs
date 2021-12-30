@@ -24,7 +24,7 @@ public class Gun : MonoBehaviour {
     void Update() {
 
         Move();
-        Fire();
+        // Fire();
         Color();
     }
 
@@ -32,6 +32,8 @@ public class Gun : MonoBehaviour {
     Vector3 target;
     public float speed;
     public float orbitRadius = 1f;
+
+    public float offset;
 
     float x;
     public float period;
@@ -43,13 +45,36 @@ public class Gun : MonoBehaviour {
 
         x += 2 * Mathf.PI * Time.deltaTime * period;
 
-        float angle = Vector2.SignedAngle((Vector2)orbital.transform.localPosition, Vector2.up);
-        angle = angle < 0f ? 360 + angle : angle;
-        Vector3 newPosition = orbitRadius * new Vector3(Mathf.Cos(x), 0.5f * Mathf.Sin(x), 0f) + orbital.transform.position;
-        newPosition = (Quaternion.Euler(0f, 0f, angle) * (newPosition-orbital.transform.position)) + orbital.transform.position;
+        Vector3 newPosition = Vector3.zero;
+        if (count < 3) {
+            newPosition = orbitRadius * new Vector3(Mathf.Cos(x), 0.5f * Mathf.Sin(x), 0f) + orbital.transform.position;
+        }
+        else if (count < 6) {
+            newPosition = orbitRadius * new Vector3(Mathf.Sin(x), 0.5f * Mathf.Cos(x), 0f) + orbital.orbitA;
+            // newPosition += Vector3.up * offset * Mathf.Floor(count / 3);
+
+        }
+        else {
+            newPosition = orbitRadius * new Vector3(Mathf.Sin(x), 0.5f * Mathf.Cos(x), 0f) + orbital.orbitB;
+
+        }
+        // newPosition = (Quaternion.Euler(0f, 0f, angle) * (newPosition - orbital.transform.position)) + orbital.transform.position;
+
+
         transform.position = newPosition;
 
-        float scale = (2f + Mathf.Sin(x)) / 0.5f + 0.5f;
+        float scale = Mathf.Sin(x) * 0.25f + 0.75f;
+        float depth = 0f;
+        if (scale > 0.875f) {
+            depth = -1f;
+        }
+        else {
+            depth = 1f;
+        }
+        Vector3 localPos = transform.localPosition;
+        localPos.z = 5f * depth;
+        transform.localPosition = localPos;
+
         transform.localScale = new Vector3(scale, scale, 0f);
 
     }

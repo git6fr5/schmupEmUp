@@ -6,6 +6,8 @@ using RandomParams = GameRules.RandomParams;
 
 public class Sequencer : MonoBehaviour {
 
+    public int difficulty = 0;
+
     public bool isTimed;
     public float duration;
     public float lull;
@@ -16,12 +18,14 @@ public class Sequencer : MonoBehaviour {
         public GameObject sequenceObject;
         public float delay;
         [HideInInspector] public bool isRunning;
+        [HideInInspector] public bool isLoading;
 
         public void Run() {
             // Deattach
             sequenceObject.transform.parent = null;
 
             // Activate
+            isLoading = false;
             sequenceObject.SetActive(true);
             isRunning = true;
         }
@@ -40,13 +44,14 @@ public class Sequencer : MonoBehaviour {
             isRunning = false;
         }
 
-        public void Reset() {
+        public void Reset(int difficulty) {
             foreach (Transform child in sequenceObject.transform) {
                 Wave wave = child.GetComponent<Wave>();
                 // Can just turn it off after its complete right?
                 // Don't need to wait till its cleared...
                 if (wave != null) {
                     wave.reset = true;
+                    wave.waves += difficulty;
                 }
             }
         }
@@ -131,17 +136,22 @@ public class Sequencer : MonoBehaviour {
     }
 
     private IEnumerator IESequence(SequenceComponent component) {
+        component.isLoading = true;
         yield return new WaitForSeconds(component.delay);
         component.Run();
+        if (!isStarted) {
+            isStarted = true;
+        }
         yield return null;
     }
 
-
+    public bool isStarted;
     public bool isFinished;
     // Update is called once per frame
     void Update() {
 
         Scroll();
+
         for (int i = 0; i < sequenceComponents.Length; i++) {
             if (sequenceComponents[i].isRunning) {
                 sequenceComponents[i].CheckEnd();
@@ -152,11 +162,16 @@ public class Sequencer : MonoBehaviour {
 
         // Check the whole thing is done.
         isFinished = true;
+        if (!isStarted) {
+            isFinished = false;
+        }
         for (int i = 0; i < sequenceComponents.Length; i++) {
-            if (sequenceComponents[i].isRunning) {
+            if (sequenceComponents[i].isRunning || sequenceComponents[i].isLoading) {
                 isFinished = false;
+                return;
             }
         }
+        isStarted = false;
 
     }
 
@@ -166,9 +181,11 @@ public class Sequencer : MonoBehaviour {
         transform.position -= transform.position.z * Vector3.forward;
     }
 
-    public void Reset() {
+    public void Reset(int round) {
+        difficulty = round;
+        isStarted = false;
         for (int i = 0; i < sequenceComponents.Length; i++) {
-            sequenceComponents[i].Reset();
+            sequenceComponents[i].Reset(difficulty);
         }
     }
 

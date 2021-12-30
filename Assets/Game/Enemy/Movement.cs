@@ -202,12 +202,17 @@ public class Movement : MonoBehaviour {
         float time = reverse ? -ticks : ticks;
 
         Vector3 acceleration = new Vector3(horizontalAcceleration * time, verticalAcceleration * time, 0f);
+        if (flip) {
+            acceleration.x *= -1;
+        }
 
         float horizontal = reverse ? -horizontalSpeed : horizontalSpeed;
         if (horizontalPeriod != 0) {
             horizontal += horizontalAmplitude * Mathf.Sin(2 * Mathf.PI * (time / horizontalPeriod + horizontalPeriodOffset));
         }
-        if (flip) { horizontal *= -1; }
+        if (flip) { 
+            horizontal *= -1;
+        }
 
             float vertical = reverse ? -verticalSpeed : verticalSpeed;
         if (verticalPeriod != 0) {
@@ -243,6 +248,9 @@ public class Movement : MonoBehaviour {
         time = reverse ? -time : time;
 
         Vector3 acceleration = new Vector3(horizontalAcceleration * time, verticalAcceleration * time, 0f);
+        if (flip) {
+            acceleration.x *= -1;
+        }
 
         float horizontal = reverse ? -horizontalSpeed : horizontalSpeed;
         if (horizontalPeriod != 0) {

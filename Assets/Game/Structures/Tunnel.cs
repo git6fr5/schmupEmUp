@@ -190,6 +190,9 @@ public class Tunnel : MonoBehaviour {
         if (render) {
             // RenderLines();
             Beams();
+            if (GameRules.Snake) {
+                Orbs();
+            }
             render = false;
         }
 
@@ -210,6 +213,21 @@ public class Tunnel : MonoBehaviour {
 
         }
 
+
+    }
+
+    public Change change;
+
+    bool blueOrb;
+    private void Orbs() {
+
+        float deltaY = Camera.main.transform.position.y + GameRules.ScreenPixelHeight / GameRules.PixelsPerUnit;
+        for (int i = 0; i < 3; i++) {
+            deltaY += 5f;
+            Change newChange = Instantiate(change.gameObject).GetComponent<Change>();
+            newChange.Init(blueOrb, new Vector3(Random.Range(-8f, 8f), startIndex + deltaY, 0f));
+            blueOrb = !blueOrb;
+        }
 
     }
 

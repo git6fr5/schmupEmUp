@@ -4,9 +4,17 @@ using UnityEngine;
 
 public class GameRules : MonoBehaviour {
 
+    public bool snake;
+    public static bool Snake;
+
+    public bool alternatingOrbs;
+    public static bool AlternatingOrbs;
+
     public static float ParrallaxMax = 100f;
     public static float TunnelDepth = 100f;
     public static float BeamDepth = 60f;
+
+    public static float OrbDepth = 30f;
 
     public static float PlatformShadow = 55f;
     public static float PlatformDepth = 50f;
@@ -17,6 +25,9 @@ public class GameRules : MonoBehaviour {
     public static float CliffShadowDepth = 95f;
     public static float CliffSideDepth = 22f;
     public static float CliffDepth = 20f;
+
+    // public static string ParticleLayer = "Particles";
+    public static float ParticleDepth = -7.5f;
 
     public static string Path = "Assets/Resources/";
 
@@ -49,6 +60,11 @@ public class GameRules : MonoBehaviour {
     public float currRotation;
     public RandomParams rotationChangeInterval;
 
+    public Color blue;
+    public Color red;
+    public static Color Blue;
+    public static Color Red;
+
     public static int ColorPaletteSize = 2;
     public enum Type {
         //
@@ -58,6 +74,8 @@ public class GameRules : MonoBehaviour {
         RedPlayer,
         BluePlayer
     }
+
+    public static GameRules Instance;
 
     void Start() {
         ScrollSpeed = scrollSpeed;
@@ -69,8 +87,21 @@ public class GameRules : MonoBehaviour {
 
         MainCamera = Camera.main;
 
+        Snake = snake;
+        Blue = blue;
+        Red = red;
         // StartCoroutine(IEGetRotation());
 
+        AlternatingOrbs = alternatingOrbs;
+
+        // Animations...
+        ExplosionAnim = explosionAnim;
+        EatAnim = eatAnim;
+        RedFireAnimation = redFireAnimation;
+        BlueFireAnimation = blueFireAnimation;
+
+        // for easy access...
+        Instance = this;
     }
 
     void Update() {
@@ -151,5 +182,74 @@ public class GameRules : MonoBehaviour {
         Vector2 screenPos = MainCamera.WorldToViewportPoint(position);
         return (screenPos.x < 1 && screenPos.x > 0 && screenPos.y < 1 && screenPos.y > 0);
     }
+
+    // For easy access to animations...
+    public static float FrameRate = 12f;
+
+    public Sprite[] explosionAnim;
+    public Sprite[] eatAnim;
+    public Sprite[] redFireAnimation;
+    public Sprite[] blueFireAnimation;
+
+    public static Sprite[] ExplosionAnim;
+    public static Sprite[] EatAnim;
+    public static Sprite[] RedFireAnimation;
+    public static Sprite[] BlueFireAnimation;
+
+    public static void PlayAnimation(Vector3 position, Sprite[] animation, bool fixedScreenPosition = false, Transform follow = null, bool loop = false) {
+
+        if (animation == null || animation.Length <= 0) {
+            return;
+        }
+        print("Playing animation");
+        Instance.StartCoroutine(Instance.IEPlayAnim(animation, position, FrameRate, fixedScreenPosition, follow, loop));
+
+    }
+
+    private IEnumerator IEPlayAnim(Sprite[] animation, Vector3 position, float frameRate, bool fixedScreenPosition, Transform follow, bool loop) {
+        SpriteRenderer newAnimation = (new GameObject("New Animation", typeof(SpriteRenderer))).GetComponent<SpriteRenderer>();
+        // newAnimation.sortingLayerName = ParticleLayer;
+        position.z = ParticleDepth;
+        newAnimation.transform.position = position;
+        if (follow != null) {
+            newAnimation.transform.parent = follow;
+        }
+        for (int i = 0; i < animation.Length; i++) {
+            newAnimation.sprite = animation[i];
+            if (FrameRate != 0f) {
+                if (fixedScreenPosition) {
+                    if (follow != null) {
+                        Vector3 newPosition = follow.position;
+                        newPosition.z = ParticleDepth;
+                        newAnimation.transform.position = newPosition;
+                    }
+                    else {
+                        newAnimation.transform.position += Vector3.up * (scrollSpeed + (scrollSpeed - scrollAcceleration * (1f / FrameRate))) * (1f / FrameRate) / 2f;
+                    }
+                }
+                yield return new WaitForSeconds(1f / FrameRate);
+            }
+        }
+        while (loop) {
+            for (int i = 0; i < animation.Length; i++) {
+                newAnimation.sprite = animation[i];
+                if (FrameRate != 0f) {
+                    if (fixedScreenPosition) {
+                        if (follow != null) {
+                            Vector3 newPosition = follow.position;
+                            newPosition.z = ParticleDepth;
+                            newAnimation.transform.position = newPosition;
+                        }
+                        else {
+                            newAnimation.transform.position += Vector3.up * (scrollSpeed + (scrollSpeed - scrollAcceleration * (1f / FrameRate))) * (1f / FrameRate) / 2f;
+                        }
+                    }
+                    yield return new WaitForSeconds(1f / FrameRate);
+                }
+            }
+        }
+        Destroy(newAnimation.gameObject);
+    }
+
 
 }
