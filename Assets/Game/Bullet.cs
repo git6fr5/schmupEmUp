@@ -40,17 +40,41 @@ public class Bullet : MonoBehaviour {
 
         Color(); // Shouldn't need to do this in update.
         Collider();
+
+        if (type == GameRules.Type.RedEnemy) {
+            GameRules.PlayAnimation(transform.position, GameRules.RedFireAnimation, true, transform);
+        }
+        else {
+            GameRules.PlayAnimation(transform.position, GameRules.BlueFireAnimation, true, transform);
+        }
     }
 
+    Player player;
     // Update is called once per frame
     void Update() {
         if (acceleration.sqrMagnitude < 0.001f * 0.001f) {
             acceleration = Vector2.zero;
         }
+
+        if (player == null) {
+            player = (Player)GameObject.FindObjectOfType(typeof(Player));
+        }
+
+        if (player != null) {
+            if (player.type == (Type)((int)type + 2)) {
+                spriteRenderer.material.SetFloat("_Opacity", 1f);
+                transform.localScale = new Vector3(1f, 1f, 1f);
+            }
+            else {
+                spriteRenderer.material.SetFloat("_Opacity", 0.5f);
+                transform.localScale = new Vector3(0.5f, 0.5f, 1f);
+            }
+        }
+
         velocity += acceleration * Time.deltaTime;
         transform.position += (Vector3)velocity * Time.deltaTime;
         Scroll();
-        Color();
+        // Color();
         Rotate();
     }
 
@@ -63,6 +87,7 @@ public class Bullet : MonoBehaviour {
         else if (type == Type.BlueEnemy || type == Type.BluePlayer) {
             spriteRenderer.material = GameRules.BlueMaterial;
         }
+        spriteRenderer.material.SetFloat("_Highlight", 1);
     }
 
     void Rotate() {

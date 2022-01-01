@@ -156,7 +156,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   neverDeleteMe: 1
-  enemyName: ___
+  enemyName: ship9
   save: 0
   load: 1
   reset: 1
@@ -181,7 +181,9 @@ MonoBehaviour:
   _bulletIndex: 0
   bulletSize: 0
   engineNodes: []
+  trailNodes: []
   hasBeenOnScreen: 0
+  weight: 0
 --- !u!4 &1553955957
 Transform:
   m_ObjectHideFlags: 0
@@ -431,6 +433,8 @@ MonoBehaviour:
     max: 0
   blue: {r: 0, g: 0, b: 0, a: 0}
   red: {r: 0, g: 0, b: 0, a: 0}
+  blueShade: {r: 0, g: 0, b: 0, a: 0}
+  redShade: {r: 0, g: 0, b: 0, a: 0}
   explosionAnim: []
   eatAnim: []
   redFireAnimation: []

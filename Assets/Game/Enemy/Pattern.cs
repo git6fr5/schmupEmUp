@@ -214,6 +214,10 @@ public class Pattern : MonoBehaviour {
         for (int shotNumber = 0; shotNumber < shotCount; shotNumber++) {
             // Fire shot.
 
+            if (shotNumber < 4) {
+                GameRules.PlaySound(GameRules.FireSound, 0.15f);
+            }
+
             // Get the angle.
             float shotAngle = shotInitAngle;
             if (shotCount > 1) {
@@ -287,15 +291,7 @@ public class Pattern : MonoBehaviour {
     public int fireCounts;
     private IEnumerator IEFireEffect() {
 
-        Enemy enemy = GetComponent<Enemy>();
-        if (enemy != null) {
-            if (enemy.type == GameRules.Type.RedEnemy) {
-                GameRules.PlayAnimation(transform.position, GameRules.RedFireAnimation, true, transform);
-            }
-            else {
-                GameRules.PlayAnimation(transform.position, GameRules.BlueFireAnimation, true, transform);
-            }
-        }
+        
 
         if (!isFiring) {
             isFiring = true;

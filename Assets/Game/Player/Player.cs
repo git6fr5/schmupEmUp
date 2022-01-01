@@ -152,10 +152,10 @@ public class Player : MonoBehaviour {
                 // There's a smarter way to do this I'm sure.
                 if (bulletType < GameRules.ColorPaletteSize) {
 
-                    if (bulletType != playerType) {
+                    if (bulletType == playerType) {
                         Respawn();
                     }
-                    else if (bulletType == playerType) {
+                    else if (bulletType != playerType) {
                         // lives += 1;
                     }
 
@@ -167,6 +167,7 @@ public class Player : MonoBehaviour {
             Cliff cliff = collisions[i].GetComponent<Cliff>();
             if (cliff != null) {
                 print("HITTING CLIFF");
+                GameRules.PlaySound(GameRules.CliffSound);
                 Respawn();
                 if (!knockback) {
                     StartCoroutine(IEKnockback());
@@ -176,12 +177,17 @@ public class Player : MonoBehaviour {
             Change change = collisions[i].GetComponent<Change>();
             if (change != null) {
 
+                if (type == Type.Ethereal) {
+                    return;
+                }
+
                 int changeType = (int)change.type;
                 int playerType = (int)type;
 
                 if (changeType != playerType) {
                     type = (Type)(changeType);
                     lives += 1;
+                    GameRules.Score += 1;
                     change.Eat();
                 }
                 else {
@@ -192,6 +198,7 @@ public class Player : MonoBehaviour {
                     }
                     else {
                         lives += 1;
+                        GameRules.Score += 1;
                         change.Eat();
 
                     }
@@ -215,9 +222,13 @@ public class Player : MonoBehaviour {
 
     public void Respawn(bool hitWall = false) {
         if (!invincible) {
+            GameRules.PlaySound(GameRules.HurtSound);
             GameRules.PlayAnimation(transform.position, GameRules.ExplosionAnim);
             invincible = true;
             lives -= 1;
+            if (lives == 1) {
+                GameRules.PlaySound(GameRules.LowHealthSound);
+            }
             if (lives <= 0) {
                 StartCoroutine(IEReset(explosionDuration * 5f));
             }
@@ -229,6 +240,8 @@ public class Player : MonoBehaviour {
     }
 
     private IEnumerator IEReset(float explosionDelay) {
+
+        GameRules.PlaySound(GameRules.LoseSound);
 
         invincible = true;
         Time.timeScale = 0.5f;

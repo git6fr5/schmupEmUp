@@ -8,8 +8,11 @@ Shader "Custom/ColorShader"
         [MaterialToggle] PixelSnap("Pixel snap", Float) = 0
 
         _Color("Color", Color) = (1,0,0,1)
+        _ShadeColor("Shade Color", Color) = (1,0,0,1)
         _HighlightColor("Highlight Color", Color) = (1,0,0,1)
         _Highlight("Highlight", Float) = 1
+
+        _Opacity("Opacity", Float) = 1
 
         _OutlineColor("Outline Color", Color) = (1,1,1,1)
         _OutlineWidth("Outline Width", Float) = 0.1
@@ -241,8 +244,11 @@ Shader "Custom/ColorShader"
             float4 _MainTex_ST;
 
             float4 _Color;
+            float4 _ShadeColor;
             float4 _HighlightColor;
             float _Highlight;
+
+            float _Opacity;
 
             v2f vert(appdata v)
             {
@@ -256,9 +262,10 @@ Shader "Custom/ColorShader"
             {
                 fixed4 col = tex2D(_MainTex, i.uv);
                 float4 o = col * col.a;
-                o.rgb = _Color.rgb * (col.b + (1 - _Highlight) * col.r);
+                float ncol = float4(1, 1, 1, 1) * (1 -_Opacity);
+                o.rgb = -ncol + _Color.rgb * (col.b + (1 - _Highlight) * col.r) + (_ShadeColor * col.g);
                 o.rgb += _HighlightColor * _Highlight * col.r;
-                o *= col.a;
+                o *= (col.a * _Opacity);
                 return o;
             }
             ENDCG

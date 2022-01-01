@@ -10,6 +10,7 @@ public class EnemyAssets : MonoBehaviour {
         public Sprite regularSprite;
         public Sprite highlightSprite;
         public Transform[] engineNodes;
+        public Vector3[] trailNodes;
 
     }
 

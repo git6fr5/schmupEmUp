@@ -31,7 +31,7 @@ public class Sequencer : MonoBehaviour {
         }
 
         // Check to turn off
-        public void CheckEnd() {
+        public void CheckEnd(Transform transform) {
             foreach (Transform child in sequenceObject.transform) {
                 Wave wave = child.GetComponent<Wave>();
                 // Can just turn it off after its complete right?
@@ -41,6 +41,7 @@ public class Sequencer : MonoBehaviour {
                 }
             }
             sequenceObject.SetActive(false);
+            sequenceObject.transform.parent = transform;
             isRunning = false;
         }
 
@@ -51,6 +52,9 @@ public class Sequencer : MonoBehaviour {
                 // Don't need to wait till its cleared...
                 if (wave != null) {
                     wave.reset = true;
+                    // wave.load = true;
+                    wave.isCleared = false;
+                    wave.isCompleted = false;
                     wave.waves += difficulty;
                 }
             }
@@ -121,10 +125,12 @@ public class Sequencer : MonoBehaviour {
     private Camera trackCam;
 
     // Start is called before the first frame update
-    void Start() {
+    void OnEnable() {
+
 
         tunnel = (Tunnel)GameObject.FindObjectOfType(typeof(Tunnel));
         trackCam = Camera.main;
+        Scroll();
 
         for (int i = 0; i < sequenceComponents.Length; i++) {
             StartCoroutine(IESequence(sequenceComponents[i]));
@@ -154,7 +160,7 @@ public class Sequencer : MonoBehaviour {
 
         for (int i = 0; i < sequenceComponents.Length; i++) {
             if (sequenceComponents[i].isRunning) {
-                sequenceComponents[i].CheckEnd();
+                sequenceComponents[i].CheckEnd(transform);
             }
         }
 
@@ -171,6 +177,10 @@ public class Sequencer : MonoBehaviour {
                 return;
             }
         }
+        //for (int i = 0; i < length; i++) {
+
+        //}
+        gameObject.SetActive(false);
         isStarted = false;
 
     }

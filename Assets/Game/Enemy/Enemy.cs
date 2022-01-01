@@ -61,6 +61,7 @@ public class Enemy : MonoBehaviour {
     private Sprite highlightSprite;
 
     public Transform[] engineNodes;
+    public Transform[] trailNodes;
 
     [System.Serializable]
     public class EnemyData {
@@ -203,10 +204,29 @@ public class Enemy : MonoBehaviour {
             newNode.localPosition = EnemyAssets.Assets[assetIndex].engineNodes[i].localPosition;
             engineNodes[i] = newNode;
         }
+
+        trailNodes = new Transform[EnemyAssets.Assets[assetIndex].trailNodes.Length];
+        for (int i = 0; i < EnemyAssets.Assets[assetIndex].trailNodes.Length; i++) {
+            Transform newNode = new GameObject("Trail Node", typeof(LineRenderer)).GetComponent<Transform>();
+            Material newMaterial = new Material(spriteRenderer.material);
+            newNode.GetComponent<LineRenderer>().materials = new Material[] { EnemyAssets.EnemyTrail };
+            newNode.parent = transform;
+            newNode.localPosition = EnemyAssets.Assets[assetIndex].trailNodes[i];
+            trailNodes[i] = newNode;
+        }
+
         //for (int i = 0; i < engineNodes.Length; i++) {
-        //    GameRules.PlayAnimation(transform.position, EnemyAssets.EngineAnimation, true, engineNodes[i], true);
+        //    Material newMaterial = new Material(spriteRenderer.material);
+        //    newMaterial.SetFloat("_Highlight", 1f);
+        //    GameRules.PlayAnimation(transform.position, EnemyAssets.EngineAnimation, true, engineNodes[i], true, newMaterial);
         //}
         // gameObject.SetActive(true);
+    }
+
+    private IEnumerator IEInitTrail() {
+        yield return new WaitForSeconds(0.25f);
+        initTrail = true;
+        yield return null;
     }
 
     // Run this to initialize the enemy
@@ -244,7 +264,9 @@ public class Enemy : MonoBehaviour {
         pattern.bulletBase = bullet;
 
         spriteRenderer = GetComponent<SpriteRenderer>();
-        
+
+        StartCoroutine(IEInitTrail());
+
         isInitialized = true;
     }
 
@@ -300,12 +322,12 @@ public class Enemy : MonoBehaviour {
         Scroll();
         Collision();
         Highlight();
+        RenderTrail();
 
         if (!isInitialized) {
             return;
         }
 
-        RenderTrail();
 
         if (pattern.isFinished) {
             currPattern = (currPattern + 1) % bulletPatternData.Length;
@@ -414,20 +436,20 @@ public class Enemy : MonoBehaviour {
     private Vector3[][] ropeSegments; // The current positions of the segments.
     // protected Vector3[][] prevRopeSegments; // The previous positions of the segments.
 
-    private bool initTrail;
+    private bool initTrail = false;
 
     void SimulationB() {
 
-        if (ropeSegments == null || ropeSegments.Length != engineNodes.Length) {
-            ropeSegments = new Vector3[engineNodes.Length][];
+        if (ropeSegments == null || ropeSegments.Length != trailNodes.Length) {
+            ropeSegments = new Vector3[trailNodes.Length][];
             for (int n = 0; n < ropeSegments.Length; n++) {
                 ropeSegments[n] = new Vector3[(int)(RopeLength / SegmentLength)];
             }
         }
 
-        for (int n = 0; n < engineNodes.Length; n++) {
+        for (int n = 0; n < trailNodes.Length; n++) {
 
-            ropeSegments[n][0] = engineNodes[n].position;
+            ropeSegments[n][0] = trailNodes[n].position;
             for (int i = 1; i < ropeSegments[n].Length; i++) {
                 ropeSegments[n][i] += GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
                 // ropeSegments[i] += (Vector3)velocity / 20f * Time.deltaTime;
@@ -437,31 +459,37 @@ public class Enemy : MonoBehaviour {
             }
 
             for (int i = 0; i < ConstraintDepth; i++) {
-                Constraints(engineNodes[n].position, ropeSegments[n]);
+                Constraints(trailNodes[n].position, ropeSegments[n]);
             }
 
-            LineRenderer trailRenderer = engineNodes[n].GetComponent<LineRenderer>();
-            if (trailRenderer == null) {
-                engineNodes[n].gameObject.AddComponent<LineRenderer>();
-                trailRenderer = engineNodes[n].GetComponent<LineRenderer>();
-                trailRenderer.materials = new Material[] { EnemyAssets.EnemyTrail };
-            }
+            if (initTrail) {
+                LineRenderer trailRenderer = trailNodes[n].GetComponent<LineRenderer>();
+                if (trailRenderer == null) {
+                    trailNodes[n].gameObject.AddComponent<LineRenderer>();
+                    trailRenderer = trailNodes[n].GetComponent<LineRenderer>();
+                    trailRenderer.materials = new Material[] { EnemyAssets.EnemyTrail };
+                }
 
-            trailRenderer.startWidth = TrailStartWidth;
-            trailRenderer.endWidth = TrailEndWidth;
-            trailRenderer.positionCount = ropeSegments[n].Length;
-            trailRenderer.SetPositions(ropeSegments[n]);
+                trailRenderer.startWidth = TrailStartWidth;
+                trailRenderer.endWidth = TrailEndWidth;
+                trailRenderer.positionCount = ropeSegments[n].Length;
+                trailRenderer.SetPositions(ropeSegments[n]);
 
-            if (type == Type.BlueEnemy) {
-                Color col = GameRules.Blue;
-                col.a = 0.25f;
-                trailRenderer.materials[0].SetColor("_Color", GameRules.Blue);
+                if (type == Type.BlueEnemy) {
+                    Color col = GameRules.Blue;
+                    col.a = 0.25f;
+                    trailRenderer.materials[0].SetColor("_Color", GameRules.Blue);
+                    trailRenderer.materials[0].SetColor("_ShadeColor", new Color(0f, 0f, 0f, 0f));
+                }
+                else {
+                    Color col = GameRules.Red;
+                    col.a = 0.25f;
+                    trailRenderer.materials[0].SetColor("_Color", GameRules.Red);
+                    trailRenderer.materials[0].SetColor("_ShadeColor", new Color(0f, 0f, 0f, 0f));
+
+                }
             }
-            else {
-                Color col = GameRules.Red;
-                col.a = 0.25f;
-                trailRenderer.materials[0].SetColor("_Color", GameRules.Red);
-            }
+            
         }
     }
 

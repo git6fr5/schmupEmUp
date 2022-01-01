@@ -16,12 +16,6 @@ public class Sequence : MonoBehaviour {
 
     private void NextSequence() {
 
-        index += 1;
-        if (index >= sequence.Length) {
-            index = 0;
-            round += 1;
-        }
-
         sequence[index].Reset(round);
         sequence[index].gameObject.SetActive(true);
         sequence[index].isStarted = false;
@@ -37,19 +31,38 @@ public class Sequence : MonoBehaviour {
         
     }
 
+    private Coroutine nextRoutine = null;
+    public bool gettingNext = false;
+
     void Update() {
 
         if (currSequenceIsNotTimed) {
 
             if (sequence[index].isFinished) {
                 sequence[index].isStarted = false;
+                if (nextRoutine == null) {
+                    gettingNext = true;
+                    nextRoutine = StartCoroutine(IENext());
+                }
                 sequence[index].gameObject.SetActive(false);
-                NextSequence();
             }
             // Check for sequence to be completed.
 
         }
 
+    }
+
+    private IEnumerator IENext() {
+        yield return new WaitForSeconds(5f);
+        index += 1;
+        if (index >= sequence.Length) {
+            index = 0;
+            round += 1;
+        }
+        NextSequence();
+        gettingNext = false;
+        nextRoutine = null;
+        yield return null;
     }
 
     private IEnumerator IEDeactivateSequence(float delay) {

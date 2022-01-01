@@ -277,7 +277,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sprites:
-  - {fileID: -702417484383542198, guid: 2713792ed5551a44c93ef348dfc73c2d, type: 3}
+  - {fileID: 201767957516689898, guid: 2713792ed5551a44c93ef348dfc73c2d, type: 3}
   index: 0
   type: 0
   velocity: {x: 0, y: 0}
@@ -524,7 +524,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sprites:
-  - {fileID: -702417484383542198, guid: 2713792ed5551a44c93ef348dfc73c2d, type: 3}
+  - {fileID: 201767957516689898, guid: 2713792ed5551a44c93ef348dfc73c2d, type: 3}
   index: 0
   type: 0
   velocity: {x: 0, y: 0}
@@ -613,6 +613,7 @@ MonoBehaviour:
   leftNode: {x: 0, y: 0, z: 0}
   shift: 0
   shiftRight: 0
+  attached: 0
   spriteBase: {fileID: 5712125997742744512}
   designs:
   - {fileID: 6655847697075510515, guid: 84ced0b416164174685394c00806158f, type: 3}
@@ -724,6 +725,15 @@ MonoBehaviour:
   blue: 0
   bulletBase: {fileID: 2196590345795924478}
   turretBase: {fileID: 2500387159476629733}
+  type: 0
+  attachPoint:
+    width: 0
+    length: 0
+    midPoint: {x: 0, y: 0, z: 0}
+    leftPointA: {x: 0, y: 0, z: 0}
+    rightPointA: {x: 0, y: 0, z: 0}
+    leftPointB: {x: 0, y: 0, z: 0}
+    rightPointB: {x: 0, y: 0, z: 0}
 --- !u!1 &8612845814760056580
 GameObject:
   m_ObjectHideFlags: 0
@@ -871,6 +881,7 @@ MonoBehaviour:
   - {fileID: 7271349080706717016, guid: be553c4378be8f149ba2afb731db2f0e, type: 3}
   - {fileID: -1715125619130263050, guid: be553c4378be8f149ba2afb731db2f0e, type: 3}
   - {fileID: 4181186073045944268, guid: be553c4378be8f149ba2afb731db2f0e, type: 3}
+  type: 0
 --- !u!212 &8612845814866782920
 SpriteRenderer:
   m_ObjectHideFlags: 0

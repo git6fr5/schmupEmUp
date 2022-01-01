@@ -50,12 +50,12 @@ public class Gun : MonoBehaviour {
             newPosition = orbitRadius * new Vector3(Mathf.Cos(x), 0.5f * Mathf.Sin(x), 0f) + orbital.transform.position;
         }
         else if (count < 6) {
-            newPosition = orbitRadius * new Vector3(Mathf.Sin(x), 0.5f * Mathf.Cos(x), 0f) + orbital.orbitA;
+            newPosition = orbitRadius * new Vector3(Mathf.Cos(x), 0.5f * Mathf.Sin(x), 0f) + orbital.orbitA;
             // newPosition += Vector3.up * offset * Mathf.Floor(count / 3);
 
         }
         else {
-            newPosition = orbitRadius * new Vector3(Mathf.Sin(x), 0.5f * Mathf.Cos(x), 0f) + orbital.orbitB;
+            newPosition = orbitRadius * new Vector3(Mathf.Cos(x), 0.5f * Mathf.Sin(x), 0f) + orbital.orbitB;
 
         }
         // newPosition = (Quaternion.Euler(0f, 0f, angle) * (newPosition - orbital.transform.position)) + orbital.transform.position;

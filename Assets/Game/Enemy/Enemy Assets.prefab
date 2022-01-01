@@ -942,49 +942,92 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c07fac373b410514484ecef6a5646825, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemyTrail: {fileID: 2100000, guid: 7f466f2242c2d6942be6a84e47ea7eb6, type: 2}
   assets:
-  - regularSprite: {fileID: 21300000, guid: cf2cb9c76b6bf7344a7b63974b9e8f23, type: 3}
+  - regularSprite: {fileID: 21300000, guid: c62a13443e11e6d4b8731f7a6d052ffb, type: 3}
     highlightSprite: {fileID: 21300000, guid: efca1ca295d23154abc7e3158d8ff2b4, type: 3}
     engineNodes:
     - {fileID: 3420331061319315940}
     - {fileID: 6921348134116355642}
-  - regularSprite: {fileID: 21300000, guid: eba5d18b140a07a4ebf6a7735bc43180, type: 3}
+    trailNodes:
+    - {x: -0.94, y: -0.42, z: 0}
+    - {x: 0.94, y: -0.42, z: 0}
+  - regularSprite: {fileID: 21300000, guid: 1c00318a1741ce44cbee206bebb9e132, type: 3}
     highlightSprite: {fileID: 21300000, guid: ac8df033adae41749859050774163092, type: 3}
     engineNodes:
     - {fileID: 6848551750073906497}
     - {fileID: 7896502321941729544}
-  - regularSprite: {fileID: 21300000, guid: 218952fae5cbc8a49b23c8771dd0b571, type: 3}
+    trailNodes:
+    - {x: -1.28, y: 0.05, z: 0}
+    - {x: 1.28, y: 0.05, z: 0}
+  - regularSprite: {fileID: 21300000, guid: 1d40793bc092fcb49a2aa05e5dd3bd92, type: 3}
     highlightSprite: {fileID: 21300000, guid: 8e767fc5201a51547ad206834ebbcf04, type: 3}
     engineNodes:
     - {fileID: 8775148819779575787}
-  - regularSprite: {fileID: 21300000, guid: 59ec0231f5da5b440bbf851f368a3965, type: 3}
+    trailNodes:
+    - {x: -0.71, y: 0.67, z: 0}
+    - {x: 0.71, y: 0.67, z: 0}
+  - regularSprite: {fileID: 21300000, guid: 1e2eaf70800f9254e9da825ce103a5b4, type: 3}
     highlightSprite: {fileID: 21300000, guid: 199114bbb34c99f45a36fcdccc28d962, type: 3}
     engineNodes:
     - {fileID: 8775148819779575787}
-  - regularSprite: {fileID: 21300000, guid: edd523d20b82fdb4884eb09d105872e8, type: 3}
+    trailNodes:
+    - {x: -0.61, y: 0.05, z: 0}
+    - {x: 0.61, y: 0.05, z: 0}
+    - {x: -0.15, y: -0.71, z: 0}
+    - {x: 0.15, y: 0.71, z: 0}
+  - regularSprite: {fileID: 21300000, guid: 7c030375c85c12847a568a617dc624fc, type: 3}
     highlightSprite: {fileID: 21300000, guid: a74eb3ed5cbe9f0408c59369e2b0d3b5, type: 3}
     engineNodes:
     - {fileID: 2702377238005427036}
-  - regularSprite: {fileID: 21300000, guid: b14c2468299cc154a96eec889cb8a428, type: 3}
+    trailNodes:
+    - {x: -0.57, y: 0.79, z: 0}
+    - {x: 0.57, y: 0.79, z: 0}
+    - {x: -1, y: 0.47, z: 0}
+    - {x: 1, y: 0.47, z: 0}
+  - regularSprite: {fileID: 21300000, guid: 0a91f9c433fb00e4084bc607781448f7, type: 3}
     highlightSprite: {fileID: 21300000, guid: 272e92a01f4c9c74a9858d7e3fd9163e, type: 3}
     engineNodes:
     - {fileID: 8775148819779575787}
-  - regularSprite: {fileID: 21300000, guid: e43a4db689282c34bbc72e4589de4015, type: 3}
+    trailNodes:
+    - {x: -0.4, y: 0.95, z: 0}
+    - {x: 0.4, y: 0.95, z: 0}
+    - {x: -1.17, y: -0.17, z: 0}
+    - {x: 1.17, y: -0.17, z: 0}
+    - {x: -0.44, y: -0.63, z: 0}
+    - {x: 0.44, y: -0.63, z: 0}
+  - regularSprite: {fileID: 21300000, guid: 713120dc8f1709f4e97b6464ab07af74, type: 3}
     highlightSprite: {fileID: 21300000, guid: 5d341122913c7a04f80cdcde65fa390a, type: 3}
     engineNodes:
     - {fileID: 8775148819779575787}
-  - regularSprite: {fileID: 21300000, guid: a62be6685dd7b0144a2509c27ff658bd, type: 3}
+    trailNodes:
+    - {x: -0.4, y: 0.95, z: 0}
+    - {x: 0.4, y: 0.95, z: 0}
+    - {x: -1.17, y: -0.17, z: 0}
+    - {x: 1.17, y: -0.17, z: 0}
+    - {x: -0.44, y: -0.63, z: 0}
+    - {x: 0.44, y: -0.63, z: 0}
+  - regularSprite: {fileID: 21300000, guid: 919a46f625a9f494ab5f400055ed3dde, type: 3}
     highlightSprite: {fileID: 21300000, guid: 91d1dae8b7afcdc4da2c0a126ef07836, type: 3}
     engineNodes:
     - {fileID: 8775148819779575787}
-  - regularSprite: {fileID: 21300000, guid: 0d6ab9c9fd53f06479387a5c429fdd2c, type: 3}
+    trailNodes:
+    - {x: -0.73, y: 0.67, z: 0}
+    - {x: 0.73, y: 0.67, z: 0}
+  - regularSprite: {fileID: 21300000, guid: 2ec06e81fe4ce774ebfb76d9b76b2e52, type: 3}
     highlightSprite: {fileID: 21300000, guid: 240db0d294ada8345a1faa25d6fe3831, type: 3}
     engineNodes:
     - {fileID: 8775148819779575787}
-  - regularSprite: {fileID: -1825481193444126957, guid: 5f7f4439055bf2b4495161a1b71c7823, type: 3}
+    trailNodes:
+    - {x: -0.65, y: 0.52, z: 0}
+    - {x: 0.65, y: 0.52, z: 0}
+    - {x: -1, y: 0, z: 0}
+    - {x: 1, y: 0, z: 0}
+  - regularSprite: {fileID: 21300000, guid: 59b71ac6c743ed84ba63b5c3abbad5ab, type: 3}
     highlightSprite: {fileID: 21300000, guid: cf2fbe322e6105540b880705a2e50f2c, type: 3}
     engineNodes:
     - {fileID: 8775148819779575787}
+    trailNodes: []
   bullets:
   - {fileID: 6432115151766772267}
   - {fileID: 6432115151550245834}

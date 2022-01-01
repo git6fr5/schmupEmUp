@@ -62,8 +62,47 @@ public class GameRules : MonoBehaviour {
 
     public Color blue;
     public Color red;
+    public Color blueShade;
+    public Color redShade;
     public static Color Blue;
     public static Color Red;
+    public static Color BlueShade;
+    public static Color RedShade;
+
+    public static int Score;
+
+    public AudioClip eatSound;
+    public AudioClip fireSoundA;
+    public AudioClip fireSoundB;
+
+    public AudioClip hurtSound;
+    public AudioClip lowHealthSound;
+    public AudioClip loseSound;
+    public AudioClip cliffSound;
+    public AudioSource audioSource;
+
+    public static AudioClip EatSound;
+    public static AudioClip FireSound;
+    public static AudioClip FireSoundB;
+    public static AudioClip HurtSound;
+    public static AudioClip LowHealthSound;
+    public static AudioClip LoseSound;
+    public static AudioClip CliffSound;
+
+    public static void PlaySound(AudioClip sound, float volume = 0.5f) {
+        if (Instance == null) { return; }
+        if (sound == FireSound) {
+            if (Random.Range(0f, 1f)> 0.5f) {
+                sound = FireSoundB;
+            }
+        }
+        AudioSource newAudio = Instantiate(Instance.audioSource.gameObject).GetComponent<AudioSource>();
+        newAudio.transform.position = MainCamera.transform.position;
+        newAudio.clip = sound;
+        newAudio.Play();
+        newAudio.volume = volume;
+        Destroy(newAudio.gameObject, newAudio.clip.length * 9f / 10f);
+    }
 
     public static int ColorPaletteSize = 2;
     public enum Type {
@@ -72,12 +111,25 @@ public class GameRules : MonoBehaviour {
         BlueEnemy,
         //
         RedPlayer,
-        BluePlayer
+        BluePlayer,
+        //
+        Ethereal
     }
 
     public static GameRules Instance;
 
     void Start() {
+        
+        EatSound = eatSound;
+        FireSound = fireSoundA;
+        FireSoundB = fireSoundB;
+        HurtSound = hurtSound;
+        LowHealthSound = lowHealthSound;
+        LoseSound = loseSound;
+        CliffSound = cliffSound;
+
+        Score = 0;
+
         ScrollSpeed = scrollSpeed;
         RedMaterial = redMaterial;
         BlueMaterial = blueMaterial;
@@ -88,6 +140,8 @@ public class GameRules : MonoBehaviour {
         MainCamera = Camera.main;
 
         Snake = snake;
+        BlueShade = blueShade;
+        RedShade = redShade;
         Blue = blue;
         Red = red;
         // StartCoroutine(IEGetRotation());
@@ -196,19 +250,22 @@ public class GameRules : MonoBehaviour {
     public static Sprite[] RedFireAnimation;
     public static Sprite[] BlueFireAnimation;
 
-    public static void PlayAnimation(Vector3 position, Sprite[] animation, bool fixedScreenPosition = false, Transform follow = null, bool loop = false) {
+    public static void PlayAnimation(Vector3 position, Sprite[] animation, bool fixedScreenPosition = false, Transform follow = null, bool loop = false, Material material = null) {
 
         if (animation == null || animation.Length <= 0) {
             return;
         }
         print("Playing animation");
-        Instance.StartCoroutine(Instance.IEPlayAnim(animation, position, FrameRate, fixedScreenPosition, follow, loop));
+        Instance.StartCoroutine(Instance.IEPlayAnim(animation, position, FrameRate, fixedScreenPosition, follow, loop, material));
 
     }
 
-    private IEnumerator IEPlayAnim(Sprite[] animation, Vector3 position, float frameRate, bool fixedScreenPosition, Transform follow, bool loop) {
+    private IEnumerator IEPlayAnim(Sprite[] animation, Vector3 position, float frameRate, bool fixedScreenPosition, Transform follow, bool loop, Material material) {
         SpriteRenderer newAnimation = (new GameObject("New Animation", typeof(SpriteRenderer))).GetComponent<SpriteRenderer>();
         // newAnimation.sortingLayerName = ParticleLayer;
+        if (material != null) {
+            newAnimation.material = material;
+        }
         position.z = ParticleDepth;
         newAnimation.transform.position = position;
         if (follow != null) {

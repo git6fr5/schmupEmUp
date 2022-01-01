@@ -94,7 +94,6 @@ public class Orbital : MonoBehaviour {
 
         transform.position += velocity * Time.deltaTime;
 
-
         transform.position = player.transform.position + (transform.position - player.transform.position).normalized * orbitRadius;
         transform.position += GameRules.ScrollSpeed * Vector3.up * Time.deltaTime;
 
